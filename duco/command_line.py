@@ -1,10 +1,10 @@
 #! /usr/bin/python
 
-from const import (
-    __version__)
+from const import (__version__)
 
-	
+
 def main():
+    """Main function."""
     print("python-duco version is " + __version__)
 
 
