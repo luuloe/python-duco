@@ -2,5 +2,6 @@
 import unittest
 import duco
 
-def test_duco:
+
+def test_duco():
     return True

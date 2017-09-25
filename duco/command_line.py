@@ -1,5 +1,5 @@
 #! /usr/bin/python
-
+"""Command line tool that wraps Python Duco."""
 from const import (__version__)
 
 

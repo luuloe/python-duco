@@ -40,6 +40,6 @@ class DucoSystem(object):
         """
         self.box_address = box_address
 
-    def box_address(self):
+    def get_box_address(self):
         """str: box_address"""
         return self.box_address
