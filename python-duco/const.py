@@ -23,7 +23,8 @@ PROJECT_CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3.4',
-    'Topic :: Home Automation'
+    'Topic :: Home Automation',
+	'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
 PROJECT_GITHUB_USERNAME = 'luuloe'
