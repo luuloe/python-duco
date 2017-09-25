@@ -35,7 +35,7 @@ setup(
     test_suite='tests',
     keywords=['duco', 'ventilation'],
     classifiers=PROJECT_CLASSIFIERS,
-	entry_points={
+    entry_points={
         'console_scripts': ['duco=duco.command_line:main'],
     }
 )
