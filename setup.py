@@ -2,11 +2,11 @@
 """Python Duco setup script."""
 import os
 from setuptools import setup, find_packages
-from python-duco.const import (__version__, PROJECT_PACKAGE_NAME,
-                                 PROJECT_LICENSE, PROJECT_URL,
-                                 PROJECT_EMAIL, PROJECT_DESCRIPTION,
-                                 PROJECT_CLASSIFIERS, GITHUB_URL,
-                                 PROJECT_AUTHOR)
+from duco.const import (__version__, PROJECT_PACKAGE_NAME,
+                        PROJECT_LICENSE, PROJECT_URL,
+                        PROJECT_EMAIL, PROJECT_DESCRIPTION,
+                        PROJECT_CLASSIFIERS, GITHUB_URL,
+                        PROJECT_AUTHOR)
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 DOWNLOAD_URL = ('{}/archive/'
