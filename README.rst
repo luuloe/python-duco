@@ -16,9 +16,10 @@ Status
 ============
 The project is currently in alpha status and not ready for use.
 
-Release scope: 
+Release scope:
+
 1. Setting up the project: 
--- * Repository structure 
+   * Repository structure 
    * Hello world like public API
    * Automatic code analysis via flak8 and pylint
    * Testing with Tox
@@ -27,7 +28,7 @@ Release scope:
    * ReadTheDocs integration 
    * Release strategy: PyPI package generation
 2. First functionality:
--- * Duco-network constants and object structure
+   * Duco-network constants and object structure
    * Finalize DucoSystem public API
    * Setup ModBus simulator
    * ModBus communication for Duco master module
