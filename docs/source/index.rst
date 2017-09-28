@@ -1,17 +1,16 @@
-.. duco documentation master file, created by
-   sphinx-quickstart on Thu Sep 28 12:14:26 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to duco's documentation!
+================================
+Python Duco API Documentation
 ================================
 
+Public API documentation.
+
+Contents:
+
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
+   :glob:
 
-   duco
-
+   api/*
 
 Indices and tables
 ==================

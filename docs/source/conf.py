@@ -19,14 +19,19 @@
 #
 import os
 import sys
+from os.path import relpath
+
+# add root path before importing duco.const
+sys.path.insert(0, os.path.abspath('../../'))
+
 from duco.const import (__version__, __short_version__,
                         PROJECT_NAME, PROJECT_COPYRIGHT,
-                        GITHUB_PATH,
-                        PROJECT_AUTHOR)
+                        PROJECT_AUTHOR, PROJECT_DESCRIPTION,
+                        PROJECT_GITHUB_USERNAME, PROJECT_GITHUB_REPOSITORY,
+                        GITHUB_PATH)
 
 
 sys.path.insert(0, os.path.abspath('_ext'))
-sys.path.insert(0, os.path.abspath('../duco'))
 
 # -- General configuration ------------------------------------------------
 
@@ -108,7 +113,16 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logo_name': PROJECT_NAME,
+    'description': PROJECT_DESCRIPTION,
+    'github_user': PROJECT_GITHUB_USERNAME,
+    'github_repo': PROJECT_GITHUB_REPOSITORY,
+    'github_type': 'star',
+    'github_banner': True,
+    'travis_button': True,
+    # 'fixed_sidebar': True, # Re-enable when we have more content
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

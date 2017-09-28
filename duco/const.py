@@ -1,5 +1,5 @@
 # coding: utf-8
-"""Constants used by python-duco."""
+"""Constants used by duco."""
 MAJOR_VERSION = 0
 MINOR_VERSION = 1
 PATCH_VERSION = '0.dev0'

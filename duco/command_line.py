@@ -1,6 +1,6 @@
 #! /usr/bin/python
 """Command line tool that wraps Python Duco."""
-from const import (__version__)
+from duco.const import (__version__)
 
 
 def main():
