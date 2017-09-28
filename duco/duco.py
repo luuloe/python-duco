@@ -19,7 +19,7 @@ class DucoSystem(object):
         attr2 (:obj:`int`, optional): Description of `attr2`.
 
     """
-    def __init__(self, box_address=DUCO_MODULE_MASTER_DEFAULT_ADDRESS):
+    def __init__(self, master_address=DUCO_MODULE_MASTER_DEFAULT_ADDRESS):
         """Example of docstring on the __init__ method.
 
         The __init__ method may be documented in either the class level
@@ -38,8 +38,8 @@ class DucoSystem(object):
             param3 (:obj:`list` of :obj:`str`): Description of `param3`.
 
         """
-        self.box_address = box_address
+        self.master_address = master_address
 
-    def get_box_address(self):
-        """str: box_address"""
-        return self.box_address
+    def get_master_address(self):
+        """str: master_address"""
+        return self.master_address
