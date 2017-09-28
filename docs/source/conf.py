@@ -19,10 +19,9 @@
 #
 import os
 import sys
-from os.path import relpath
 
 # add root path before importing duco.const
-sys.path.insert(0, os.path.abspath('../../'))
+#sys.path.insert(0, os.path.abspath('../../'))
 
 from duco.const import (__version__, __short_version__,
                         PROJECT_NAME, PROJECT_COPYRIGHT,
