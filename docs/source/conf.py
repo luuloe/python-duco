@@ -17,14 +17,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, 'W:\python-duco\repos\dev\duco')
+import os
+import sys
 from duco.const import (__version__, __short_version__,
                         PROJECT_NAME, PROJECT_COPYRIGHT,
                         GITHUB_PATH,
                         PROJECT_AUTHOR)
 
+
+sys.path.insert(0, os.path.abspath('_ext'))
 
 # -- General configuration ------------------------------------------------
 
@@ -183,7 +184,6 @@ texinfo_documents = [
      author, 'duco', 'One line description of project.',
      'Miscellaneous'),
 ]
-
 
 
 # -- Options for Epub output ----------------------------------------------
