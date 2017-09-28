@@ -47,7 +47,7 @@ Module
 
 You can import the module as `duco`.
 
-   code-block:: python
+.. code-block:: python
 
     import duco
 
