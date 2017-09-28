@@ -16,7 +16,7 @@ PACKAGES = find_packages(exclude=['tests', 'tests.*'])
 
 REQUIRES = []
 #    'pymodbus==1.3.2',
-#]
+# ]
 
 setup(
     name=PROJECT_PACKAGE_NAME,
