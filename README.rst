@@ -1,4 +1,4 @@
-Python Duco |Build Status| |Coverage Status| |Doc Status|
+python-duco |Build Status| |Coverage Status| |Doc Status|
 =============================================================
 Python API and command line tool for communicating to the Duco™ Ventilation System. 
 
