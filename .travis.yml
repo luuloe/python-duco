@@ -20,4 +20,4 @@ cache:
 install: pip install -U tox coveralls
 language: python
 script: travis_wait tox
-after_success: coverall
+after_success: coveralls
