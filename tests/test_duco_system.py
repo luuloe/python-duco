@@ -2,17 +2,17 @@
 import unittest
 import duco
 from duco.const import (
-    DUCO_MODULE_MASTER_DEFAULT_ADDRESS)
+    DUCO_MODBUS_DEFAULT_MASTER_ADDRESS)
 
 
-class TestConfig(unittest.TestCase):
+class TestDucoSystem(unittest.TestCase):
     """Test the DucoSystem."""
 
     def test_master_address(self):
         """Test get_master_address returns the expected result."""
         dapi = duco.DucoSystem()
         # File created with create_file are empty
-        self.assertEqual(DUCO_MODULE_MASTER_DEFAULT_ADDRESS,
+        self.assertEqual(DUCO_MODBUS_DEFAULT_MASTER_ADDRESS,
                          dapi.get_master_address())
 
         dapi = duco.DucoSystem(7)
