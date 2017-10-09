@@ -2,4 +2,5 @@
 
 
 def test_duco():
+    """Test duco dummy."""
     return True

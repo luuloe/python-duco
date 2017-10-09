@@ -15,12 +15,12 @@ class Node(object):
     """Duco base node."""
 
     # Create based on ModuleType:
+    @staticmethod
     def factory(node_id, node_type):
         """Create Node based on node_id and node_type."""
         if node_type == ModuleType.MASTER:
             return Box(node_id, node_type)
         assert 0, "Bad node creation: " + node_type
-    factory = staticmethod(factory)
 
     def __init__(self, node_id, node_type):
         """Initialize Node base."""
