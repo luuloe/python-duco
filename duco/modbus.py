@@ -5,7 +5,7 @@ import threading
 
 from duco.const import (
     DUCO_REG_ADDR_INPUT_MODULE_TYPE)
-from duco.types import (ModuleType)
+from duco.enum_types import (ModuleType)
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)

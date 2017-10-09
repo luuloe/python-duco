@@ -5,7 +5,7 @@ from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
                         DUCO_REG_ADDR_HOLD_AUTOMIN,
                         DUCO_REG_ADDR_HOLD_AUTOMAX,
                         DUCO_REG_ADDR_HOLD_ACTION)
-from duco.types import (ModuleType, ZoneStatus, ZoneAction)
+from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
 from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING, 
                          DATA_TYPE_INT, 
                          to_register_address, ModbusRegister)
