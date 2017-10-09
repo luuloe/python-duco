@@ -10,9 +10,9 @@ from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_BAUDRATE, CONF_BYTESIZE,
 
 
 def create_config(modbus_client_type, modbus_client_port):
-    """Create config dictionary"""
-    config = {CONF_TYPE : str(modbus_client_type), 
-              CONF_PORT : str(modbus_client_port)}
+    """Create config dictionary."""
+    config = {CONF_TYPE: str(modbus_client_type),
+              CONF_PORT: str(modbus_client_port)}
     # type specific part
     if modbus_client_type == 'serial':
         config[CONF_METHOD] = DUCO_MODBUS_METHOD
@@ -24,8 +24,9 @@ def create_config(modbus_client_type, modbus_client_port):
         config[CONF_HOST] = '127.0.0.1'
     else:
         raise ValueError("modbus_client_type must be serial or tcp")
-    
+
     return config
+
 
 class DucoSystem(object):
     """The summary line for a class docstring should fit on one line.
@@ -43,9 +44,10 @@ class DucoSystem(object):
         attr2 (:obj:`int`, optional): Description of `attr2`.
 
     """
-    def __init__(self, modbus_client_type, modbus_client_port, 
+
+    def __init__(self, modbus_client_type, modbus_client_port,
                  master_address=DUCO_MODBUS_DEFAULT_MASTER_ADDRESS):
-        """Example of docstring on the __init__ method.
+        """Initialize DucoSystem.
 
         The __init__ method may be documented in either the class level
         docstring, or as a docstring on the __init__ method itself.
@@ -68,5 +70,5 @@ class DucoSystem(object):
         enumerate_module_tree(self._config)
 
     def get_master_address(self):
-        """str: master_address"""
+        """Return master_address."""
         return self.master_address

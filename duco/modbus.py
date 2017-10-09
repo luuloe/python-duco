@@ -29,34 +29,35 @@ DATA_TYPE_FLOAT = 'float'
 # Global variable containing Modbus hub
 MODBUSHUB = None
 
+
 def enumerate_module_tree(config):
     """Enumerate Duco module tree."""
-    if MODBUSHUB == None:
+    if MODBUSHUB is None:
         setup_modbus(config)
-    
+
     node_id = 1
     node_found = True
-    
+
     while node_found:
         _LOGGER.debug("probe node_id %d", node_id)
         result = MODBUSHUB.read_input_registers(
-            to_register_address(node_id, DUCO_REG_ADDR_INPUT_MODULE_TYPE), 1)
+            to_register_addr(node_id, DUCO_REG_ADDR_INPUT_MODULE_TYPE), 1)
         try:
             register = result.registers
         except AttributeError:
             _LOGGER.debug("No response from node_id %d", node_id)
             node_found = False
             break
-        
+
         module_type = ModuleType(register(0))
-        _LOGGER.debug("node_id %d is a module of type %s", 
+        _LOGGER.debug("node_id %d is a module of type %s",
                       node_id, module_type)
-        
+
 
 def setup_modbus(config):
-    """Setup Modbus Hub."""
+    """Create and configure Modbus Hub."""
     client_type = config[CONF_TYPE]
-    
+
     if client_type == 'serial':
         from pymodbus.client.sync import ModbusSerialClient as ModbusClient
         client = ModbusClient(method=config[CONF_METHOD],
@@ -76,16 +77,19 @@ def setup_modbus(config):
     MODBUSHUB = ModbusHub(client)
     # time to connect
     MODBUSHUB.connect()
-    
+
     return True
+
 
 def close_modbus():
     """Close Modbus hub."""
     MODBUSHUB.close()
 
-def to_register_address(node_id, param_id):
-    """Helper function that computes modbus address from node_id and param_id."""
+
+def to_register_addr(node_id, param_id):
+    """Compute modbus address from node_id and param_id."""
     return node_id*10 + param_id
+
 
 class ModbusHub(object):
     """Thread safe wrapper class for pymodbus."""
@@ -146,7 +150,8 @@ class ModbusHub(object):
             self._client.write_registers(
                 address,
                 values)
-            
+
+
 class ModbusRegister(object):
     """Modbus register."""
 
@@ -195,7 +200,7 @@ class ModbusRegister(object):
         try:
             registers = result.registers
         except AttributeError:
-            _LOGGER.error("No response from modbus register %s", 
+            _LOGGER.error("No response from modbus register %s",
                           self._register)
             return
         if self._data_type == DATA_TYPE_FLOAT:

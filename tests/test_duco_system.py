@@ -10,11 +10,11 @@ class TestDucoSystem(unittest.TestCase):
 
     def test_master_address(self):
         """Test get_master_address returns the expected result."""
-        dapi = duco.DucoSystem()
+        dapi = duco.DucoSystem('serial', 'COM0')
         # File created with create_file are empty
         self.assertEqual(DUCO_MODBUS_DEFAULT_MASTER_ADDRESS,
                          dapi.get_master_address())
 
-        dapi = duco.DucoSystem(7)
+        dapi = duco.DucoSystem('serial', 'COM0', 7)
         # File created with create_file are empty
         self.assertEqual(7, dapi.get_master_address())
