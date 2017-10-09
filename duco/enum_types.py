@@ -34,7 +34,8 @@ class ModuleType(IntEnum):
 
     @classmethod
     def supported(cls, value):
-        return (any(value == item.value for item in cls))
+        """Return whether value is a supported ModuleType."""
+        return any(value == item.value for item in cls)
 
 
 @unique
