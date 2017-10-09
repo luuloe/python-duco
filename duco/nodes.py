@@ -111,6 +111,6 @@ class Box(Node, AutoMinMax):
 
     def __init__(self, node_id, node_type):
         """Initialize Box node."""
-        super(Node, self).__init__(node_id, node_type)
-        super(AutoMinMax, self).__init__(node_id)
+        Node.__init__(node_id, node_type)
+        AutoMinMax.__init__(node_id)
         # no additional registers
