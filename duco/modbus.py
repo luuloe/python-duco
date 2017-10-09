@@ -4,11 +4,12 @@ import struct
 import threading
 
 from duco.const import (
+    PROJECT_PACKAGE_NAME,
     DUCO_REG_ADDR_INPUT_MODULE_TYPE)
 from duco.enum_types import (ModuleType)
 
-_LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
+
+_LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 
 # Type of network
 CONF_METHOD = 'method'
@@ -37,6 +38,7 @@ def enumerate_module_tree(config):
 
     node_id = 1
     node_found = True
+    node_list = []
 
     while node_found:
         _LOGGER.debug("probe node_id %d", node_id)
@@ -49,13 +51,26 @@ def enumerate_module_tree(config):
             node_found = False
             break
 
-        module_type = ModuleType(register(0))
-        _LOGGER.debug("node_id %d is a module of type %s",
-                      node_id, module_type)
+        reg_value = register[0]
+
+        if reg_value == 0:
+            node_found = False
+            break
+        elif ModuleType.supported(reg_value):
+            module_type = ModuleType(reg_value)
+            _LOGGER.debug("node_id %d is a module of type %s",
+                          node_id, module_type)
+        else:
+            _LOGGER.debug("Not supported node_id %d", node_id)
+
+        node_id = node_id + 1
+
+    return node_list
 
 
 def setup_modbus(config):
     """Create and configure Modbus Hub."""
+    _LOGGER.debug("setup modbus")
     client_type = config[CONF_TYPE]
 
     if client_type == 'serial':
@@ -121,7 +136,7 @@ class ModbusHub(object):
         with self._lock:
             return self._client.read_input_registers(
                 address,
-                count)
+                count, unit=1)
 
     def read_holding_registers(self, address, count=1):
         """Read holding registers."""

@@ -67,7 +67,7 @@ class DucoSystem(object):
         """
         self._config = create_config(modbus_client_type, modbus_client_port)
         self.master_address = master_address
-        enumerate_module_tree(self._config)
+        self.node_list = enumerate_module_tree(self._config)
 
     def get_master_address(self):
         """Return master_address."""

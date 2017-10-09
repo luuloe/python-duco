@@ -32,6 +32,10 @@ class ModuleType(IntEnum):
     ROOM_SWITCH = DUCO_MODULE_TYPE_ROOM_SWITCH
     ACTUATOR_PRINT = DUCO_MODULE_TYPE_ACTUATOR_PRINT
 
+    @classmethod
+    def supported(cls, value):
+        return (any(value == item.value for item in cls))
+
 
 @unique
 class ZoneStatus(IntEnum):
