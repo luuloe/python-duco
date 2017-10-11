@@ -1,18 +1,22 @@
 """Duco."""
 from duco.const import (
-    DUCO_MODBUS_DEFAULT_MASTER_ADDRESS, DUCO_MODBUS_BAUD_RATE,
+    DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID, DUCO_MODBUS_BAUD_RATE,
     DUCO_MODBUS_BYTE_SIZE, DUCO_MODBUS_STOP_BITS,
     DUCO_MODBUS_PARITY, DUCO_MODBUS_METHOD)
 
-from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_BAUDRATE, CONF_BYTESIZE,
-                         CONF_STOPBITS, CONF_PARITY, CONF_HOST, CONF_METHOD,
-                         enumerate_module_tree)
+from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_MASTER_UNIT_ID,
+                         CONF_BAUDRATE, CONF_BYTESIZE, CONF_STOPBITS,
+                         CONF_PARITY, CONF_HOST, CONF_METHOD)
+
+from duco.nodes import (enumerate_node_tree)
 
 
-def create_config(modbus_client_type, modbus_client_port):
+def create_config(modbus_client_type, modbus_client_port,
+                  modbus_master_unit_id):
     """Create config dictionary."""
     config = {CONF_TYPE: str(modbus_client_type),
-              CONF_PORT: str(modbus_client_port)}
+              CONF_PORT: str(modbus_client_port),
+              CONF_MASTER_UNIT_ID: int(modbus_master_unit_id)}
     # type specific part
     if modbus_client_type == 'serial':
         config[CONF_METHOD] = DUCO_MODBUS_METHOD
@@ -46,7 +50,7 @@ class DucoSystem(object):
     """
 
     def __init__(self, modbus_client_type, modbus_client_port,
-                 master_address=DUCO_MODBUS_DEFAULT_MASTER_ADDRESS):
+                 modbus_master_unit_id=DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID):
         """Initialize DucoSystem.
 
         The __init__ method may be documented in either the class level
@@ -65,10 +69,11 @@ class DucoSystem(object):
             param3 (:obj:`list` of :obj:`str`): Description of `param3`.
 
         """
-        self._config = create_config(modbus_client_type, modbus_client_port)
-        self.master_address = master_address
-        self.node_list = enumerate_module_tree(self._config)
+        self._config = create_config(modbus_client_type, modbus_client_port,
+                                     modbus_master_unit_id)
+        self.node_list = enumerate_node_tree(self._config)
 
-    def get_master_address(self):
-        """Return master_address."""
-        return self.master_address
+    @property
+    def config(self):
+        """Return system configuration."""
+        return self._config

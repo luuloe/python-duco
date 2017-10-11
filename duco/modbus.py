@@ -12,6 +12,7 @@ from duco.enum_types import (ModuleType)
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 
 # Type of network
+CONF_MASTER_UNIT_ID = 'master_unit_id'
 CONF_METHOD = 'method'
 CONF_HOST = 'host'
 CONF_PORT = 'port'
@@ -29,43 +30,6 @@ DATA_TYPE_FLOAT = 'float'
 
 # Global variable containing Modbus hub
 MODBUSHUB = None
-
-
-def enumerate_module_tree(config):
-    """Enumerate Duco module tree."""
-    if MODBUSHUB is None:
-        setup_modbus(config)
-
-    node_id = 1
-    node_found = True
-    node_list = []
-
-    while node_found:
-        _LOGGER.debug("probe node_id %d", node_id)
-        result = MODBUSHUB.read_input_registers(
-            to_register_addr(node_id, DUCO_REG_ADDR_INPUT_MODULE_TYPE), 1)
-        try:
-            register = result.registers
-        except AttributeError:
-            _LOGGER.debug("No response from node_id %d", node_id)
-            node_found = False
-            break
-
-        reg_value = register[0]
-
-        if reg_value == 0:
-            node_found = False
-            break
-        elif ModuleType.supported(reg_value):
-            module_type = ModuleType(reg_value)
-            _LOGGER.debug("node_id %d is a module of type %s",
-                          node_id, module_type)
-        else:
-            _LOGGER.debug("Not supported node_id %d", node_id)
-
-        node_id = node_id + 1
-
-    return node_list
 
 
 def setup_modbus(config):
@@ -89,11 +53,32 @@ def setup_modbus(config):
         return False
 
     global MODBUSHUB
-    MODBUSHUB = ModbusHub(client)
+    MODBUSHUB = ModbusHub(client, config[CONF_MASTER_UNIT_ID])
     # time to connect
     MODBUSHUB.connect()
 
     return True
+
+
+def probe_node_id(node_id):
+    """Probe Modbus for node_id module type."""
+    _LOGGER.debug("probe node_id %d", node_id)
+    modbus_result = MODBUSHUB.read_input_registers(
+        to_register_addr(node_id, DUCO_REG_ADDR_INPUT_MODULE_TYPE), 1)
+    try:
+        register = modbus_result.registers
+        response = register[0]
+    except AttributeError:
+        _LOGGER.debug("No response from node_id %d", node_id)
+        return False
+
+    if ModuleType.supported(response):
+        module_type = ModuleType(response)
+        _LOGGER.debug("node_id %d is a module of type %s",
+                      node_id, module_type)
+        return module_type
+
+    return False
 
 
 def close_modbus():
@@ -109,9 +94,10 @@ def to_register_addr(node_id, param_id):
 class ModbusHub(object):
     """Thread safe wrapper class for pymodbus."""
 
-    def __init__(self, modbus_client):
+    def __init__(self, modbus_client, modbus_master_unit_id):
         """Initialize the modbus hub."""
         self._client = modbus_client
+        self._kwargs = {'unit': modbus_master_unit_id}
         self._lock = threading.Lock()
 
     def close(self):
@@ -129,42 +115,48 @@ class ModbusHub(object):
         with self._lock:
             return self._client.read_coils(
                 address,
-                count)
+                count,
+                **self._kwargs)
 
     def read_input_registers(self, address, count=1):
         """Read input registers."""
         with self._lock:
             return self._client.read_input_registers(
                 address,
-                count, unit=1)
+                count,
+                **self._kwargs)
 
     def read_holding_registers(self, address, count=1):
         """Read holding registers."""
         with self._lock:
             return self._client.read_holding_registers(
                 address,
-                count)
+                count,
+                **self._kwargs)
 
     def write_coil(self, address, value):
         """Write coil."""
         with self._lock:
             self._client.write_coil(
                 address,
-                value)
+                value,
+                **self._kwargs)
 
     def write_register(self, address, value):
         """Write register."""
         with self._lock:
             self._client.write_register(
                 address,
-                value)
+                value,
+                **self._kwargs)
 
     def write_registers(self, address, values):
         """Write registers."""
         with self._lock:
             self._client.write_registers(
                 address,
-                values)
+                values,
+                **self._kwargs)
 
 
 class ModbusRegister(object):

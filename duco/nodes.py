@@ -7,8 +7,33 @@ from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
                         DUCO_REG_ADDR_HOLD_ACTION)
 from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
 from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
-                         DATA_TYPE_INT,
-                         to_register_addr, ModbusRegister)
+                         DATA_TYPE_INT, to_register_addr,
+                         setup_modbus, probe_node_id, ModbusRegister)
+
+MODBUS_SETUP = False
+
+
+def enumerate_node_tree(config):
+    """Enumerate Duco module tree."""
+    global MODBUS_SETUP
+    if MODBUS_SETUP is False:
+        MODBUS_SETUP = setup_modbus(config)
+
+    node_id = 1
+    node_found = True
+    node_list = []
+
+    while node_found:
+        node_type = probe_node_id(node_id)
+
+        if node_type is False:
+            node_found = False
+        else:
+            node_list.append(Node.factory(node_id, node_type))
+
+        node_id = node_id + 1
+
+    return node_list
 
 
 class Node(object):
