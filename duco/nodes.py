@@ -389,7 +389,7 @@ class UserControllerNode(Node, UserController):
     """UserControllerNode class."""
 
     def __init__(self, node_id, node_type):
-        """UserControllerNode CO2SensorNode."""
+        """Initialize UserControllerNode."""
         Node.__init__(node_id, node_type)
         UserController.__init__(node_id)
 
