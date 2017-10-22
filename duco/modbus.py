@@ -83,6 +83,7 @@ def probe_node_id(node_id):
 
 def close_modbus():
     """Close Modbus hub."""
+    _LOGGER.debug("close modbus")
     MODBUSHUB.close()
 
 
@@ -181,6 +182,14 @@ class ModbusRegister(object):
     def value(self):
         """Return the value of the register."""
         return self._value
+
+    @property
+    def state(self):
+        """Return the state of the register."""
+        self.update()
+        return {'name': self._name,
+                'value': self._value,
+                'unit': self._unit_of_measurement}
 
     @property
     def name(self):

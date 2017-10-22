@@ -6,7 +6,8 @@ from duco.const import (
 
 from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_MASTER_UNIT_ID,
                          CONF_BAUDRATE, CONF_BYTESIZE, CONF_STOPBITS,
-                         CONF_PARITY, CONF_HOST, CONF_METHOD)
+                         CONF_PARITY, CONF_HOST, CONF_METHOD,
+                         setup_modbus, close_modbus)
 
 from duco.nodes import (enumerate_node_tree)
 
@@ -25,7 +26,7 @@ def create_config(modbus_client_type, modbus_client_port,
         config[CONF_STOPBITS] = DUCO_MODBUS_STOP_BITS
         config[CONF_PARITY] = DUCO_MODBUS_PARITY
     elif modbus_client_type == 'tcp':
-        config[CONF_HOST] = '127.0.0.1'
+        config[CONF_HOST] = 'ducobox.local'
     else:
         raise ValueError("modbus_client_type must be serial or tcp")
 
@@ -71,7 +72,17 @@ class DucoSystem(object):
         """
         self._config = create_config(modbus_client_type, modbus_client_port,
                                      modbus_master_unit_id)
-        self.node_list = enumerate_node_tree(self._config)
+        self.node_list = list()
+
+    def __enter__(self):
+        """Enter."""
+        setup_modbus(self._config)
+        self.node_list = enumerate_node_tree()
+        return self
+
+    def __exit__(self, exc_type, _exc_value, traceback):
+        """Exit."""
+        close_modbus()
 
     @property
     def config(self):

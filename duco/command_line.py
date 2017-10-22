@@ -53,8 +53,10 @@ def main():
 
     configure_logging()
 
-    dapi = DucoSystem(args.modbus_type, args.modbus_port)
-    print(dapi.node_list)
+    with DucoSystem(args.modbus_type, args.modbus_port) as dapi:
+        for node in dapi.node_list:
+            print(node.node_type)
+            print(node.state())
 
 
 if __name__ == '__main__':

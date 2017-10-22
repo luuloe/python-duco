@@ -20,21 +20,17 @@ from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
                         DUCO_TEMPERATURE_SCALE_FACTOR,
                         DUCO_TEMPERATURE_PRECISION,
                         DUCO_RH_SCALE_FACTOR,
-                        DUCO_RH_PRECISION)
+                        DUCO_RH_PRECISION,
+                        DUCO_ZONE_STATUS_OFFSET,
+                        DUCO_ACTION_OFFSET)
 from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
 from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
-                         DATA_TYPE_INT, DATA_TYPE_FLOAT, to_register_addr,
-                         setup_modbus, probe_node_id, ModbusRegister)
-
-MODBUS_SETUP = False
+                         DATA_TYPE_INT, to_register_addr,
+                         probe_node_id, ModbusRegister)
 
 
-def enumerate_node_tree(config):
+def enumerate_node_tree():
     """Enumerate Duco module tree."""
-    global MODBUS_SETUP
-    if MODBUS_SETUP is False:
-        MODBUS_SETUP = setup_modbus(config)
-
     node_id = 1
     node_found = True
     node_list = []
@@ -87,7 +83,8 @@ class Node(object):
         self._reg_status = ModbusRegister(
             'Zone status',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_STATUS),
-            REGISTER_TYPE_INPUT, '', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT, '', 1, 1,
+            DUCO_ZONE_STATUS_OFFSET, DATA_TYPE_INT, 0)
 
         self._reg_fan_actual = ModbusRegister(
             'Fan actual',
@@ -107,7 +104,8 @@ class Node(object):
         self._reg_action = ModbusRegister(
             'Zone action',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_ACTION),
-            REGISTER_TYPE_HOLDING, '', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '', 1, 1,
+            DUCO_ACTION_OFFSET, DATA_TYPE_INT, 0)
 
     @property
     def node_id(self):
@@ -130,6 +128,7 @@ class Node(object):
     def status(self):
         """Return the zone status of the node."""
         # synchronous update for now
+        print(list(ZoneStatus))
         self._reg_status.update()
         return ZoneStatus(self._reg_status.value)
 
@@ -139,6 +138,11 @@ class Node(object):
         # synchronous update for now
         self._reg_zone.update()
         return self._reg_zone.value
+
+    def state(self):
+        """Return the state of the node."""
+        return (self._reg_action.state, self._reg_status.state,
+                self._reg_zone.state)
 
 
 class AutoMinMaxCapable(object):
@@ -170,15 +174,23 @@ class AutoMinMaxCapable(object):
         self._reg_automax.update()
         return self._reg_automax.value
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_automin.state, self._reg_automax.state)
+
 
 class BoxNode(Node, AutoMinMaxCapable):
     """Duco box node."""
 
     def __init__(self, node_id, node_type):
         """Initialize BoxNode node."""
-        Node.__init__(node_id, node_type)
-        AutoMinMaxCapable.__init__(node_id)
+        Node.__init__(self, node_id, node_type)
+        AutoMinMaxCapable.__init__(self, node_id)
         # no additional registers
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return Node.state(self) + AutoMinMaxCapable.state(self)
 
 
 class TemperatureSensor(object):
@@ -191,7 +203,7 @@ class TemperatureSensor(object):
             'Temperature',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_TEMPERATURE),
             REGISTER_TYPE_INPUT, '°C', 1, DUCO_TEMPERATURE_SCALE_FACTOR,
-            0, DATA_TYPE_FLOAT, DUCO_TEMPERATURE_PRECISION)
+            0, DATA_TYPE_INT, DUCO_TEMPERATURE_PRECISION)
 
     @property
     def temperature(self):
@@ -200,15 +212,19 @@ class TemperatureSensor(object):
         self._reg_temperature.update()
         return self._reg_temperature.value
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_temperature.state,)
+
 
 class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
     """Valve base class."""
 
     def __init__(self, node_id, node_type):
         """Initialize Valve base class."""
-        Node.__init__(node_id, node_type)
-        AutoMinMaxCapable.__init__(node_id)
-        TemperatureSensor.__init__(node_id)
+        Node.__init__(self, node_id, node_type)
+        AutoMinMaxCapable.__init__(self, node_id)
+        TemperatureSensor.__init__(self, node_id)
 
         # holding
         self._reg_flow = ModbusRegister(
@@ -223,6 +239,11 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
         # synchronous update for now
         self._reg_flow.update()
         return self._reg_flow.value
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (Node.state(self), AutoMinMaxCapable.state(self),
+                TemperatureSensor.state(self), self._reg_flow.state)
 
 
 class CO2Sensor(object):
@@ -257,6 +278,10 @@ class CO2Sensor(object):
         self._reg_co2_setpoint.update()
         return self._reg_co2_setpoint.value
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_co2_setpoint.state, self._reg_co2_value.state)
+
 
 class RHSensor(object):
     """RHSensor base class."""
@@ -268,7 +293,7 @@ class RHSensor(object):
             'RH value',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_RH_ACTUAL),
             REGISTER_TYPE_INPUT, '%', 1, DUCO_RH_SCALE_FACTOR,
-            0, DATA_TYPE_FLOAT, DUCO_RH_PRECISION)
+            0, DATA_TYPE_INT, DUCO_RH_PRECISION)
         # holding
         self._reg_rh_setpoint = ModbusRegister(
             'RH setpoint',
@@ -301,6 +326,11 @@ class RHSensor(object):
         # synchronous update for now
         self._reg_rh_delta.update()
         return bool(self._reg_rh_delta.value)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_rh_setpoint.state, self._reg_rh_value.state,
+                self._reg_rh_delta.state)
 
 
 class UserController(object):
@@ -358,13 +388,18 @@ class UserController(object):
         self._reg_manual_time.update()
         return self._reg_manual_time.value
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_button_1.state, self._reg_button_2.state,
+                self._reg_button_3.state, self._reg_manual_time.state)
+
 
 class SensorlessValveNode(Valve):
     """Valve base class."""
 
     def __init__(self, node_id, node_type):
         """Initialize Valve base class."""
-        Valve.__init__(node_id, node_type)
+        Valve.__init__(self, node_id, node_type)
 
 
 class CO2ValveNode(Valve, CO2Sensor):
@@ -372,8 +407,12 @@ class CO2ValveNode(Valve, CO2Sensor):
 
     def __init__(self, node_id, node_type):
         """Initialize CO2ValveNode."""
-        Valve.__init__(node_id, node_type)
-        CO2Sensor.__init__(node_id)
+        Valve.__init__(self, node_id, node_type)
+        CO2Sensor.__init__(self, node_id)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return Valve.state(self) + CO2Sensor.state(self)
 
 
 class RHValveNode(Valve, RHSensor):
@@ -381,8 +420,12 @@ class RHValveNode(Valve, RHSensor):
 
     def __init__(self, node_id, node_type):
         """Initialize RHValveNode."""
-        Valve.__init__(node_id, node_type)
-        RHSensor.__init__(node_id)
+        Valve.__init__(self, node_id, node_type)
+        RHSensor.__init__(self, node_id)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return Valve.state(self) + RHSensor.state(self)
 
 
 class UserControllerNode(Node, UserController):
@@ -390,8 +433,12 @@ class UserControllerNode(Node, UserController):
 
     def __init__(self, node_id, node_type):
         """Initialize UserControllerNode."""
-        Node.__init__(node_id, node_type)
-        UserController.__init__(node_id)
+        Node.__init__(self, node_id, node_type)
+        UserController.__init__(self, node_id)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return Node.state(self) + UserController.state(self)
 
 
 class CO2SensorNode(Node, UserController, CO2Sensor):
@@ -399,9 +446,14 @@ class CO2SensorNode(Node, UserController, CO2Sensor):
 
     def __init__(self, node_id, node_type):
         """Initialize CO2SensorNode."""
-        Node.__init__(node_id, node_type)
-        UserController.__init__(node_id)
-        CO2Sensor.__init__(node_id)
+        Node.__init__(self, node_id, node_type)
+        UserController.__init__(self, node_id)
+        CO2Sensor.__init__(self, node_id)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        state = Node.state(self) + UserController.state(self)
+        return state + CO2Sensor.state(self)
 
 
 class RHSensorNode(Node, UserController, RHSensor):
@@ -409,6 +461,11 @@ class RHSensorNode(Node, UserController, RHSensor):
 
     def __init__(self, node_id, node_type):
         """Initialize RHSensorNode."""
-        Node.__init__(node_id, node_type)
-        UserController.__init__(node_id)
-        RHSensor.__init__(node_id)
+        Node.__init__(self, node_id, node_type)
+        UserController.__init__(self, node_id)
+        RHSensor.__init__(self, node_id)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        state = Node.state(self) + UserController.state(self)
+        return state + RHSensor.state(self)
