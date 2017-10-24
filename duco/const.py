@@ -11,13 +11,15 @@ CONSTRAINT_FILE = 'package_constraints.txt'
 
 PROJECT_NAME = 'Python Duco'
 PROJECT_PACKAGE_NAME = 'python-duco'
-PROJECT_LICENSE = 'Apache License 2.0'
+PROJECT_LICENSE = 'MIT License'
 PROJECT_AUTHOR = 'Luuk Loeffen'
 PROJECT_COPYRIGHT = ' 2017, {}'.format(PROJECT_AUTHOR)
 PROJECT_EMAIL = 'luukloeffen@hotmail.com'
 PROJECT_DESCRIPTION = ('Open-source Python 3 library that allows '
                        'communication to the Duco Ventilation System.')
 PROJECT_CLASSIFIERS = [
+    'Development Status :: 3 - Alpha',
+    'Environment :: Console',
     'Intended Audience :: End Users/Desktop',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
