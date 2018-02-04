@@ -142,7 +142,8 @@ class Node(object):
     def state(self):
         """Return the state of the node."""
         return (self._reg_action.state, self._reg_status.state,
-                self._reg_zone.state)
+                self._reg_zone.state, self._reg_fan_actual.state,
+                self._reg_setpoint.state)
 
 
 class AutoMinMaxCapable(object):

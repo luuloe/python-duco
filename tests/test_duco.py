@@ -1,4 +1,4 @@
-"""Test methods in duco."""
+"""Test methods in duco/duco.py."""
 
 
 def test_duco():

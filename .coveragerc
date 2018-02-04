@@ -1,6 +1,10 @@
 [run]
 source = duco
 
+omit =
+    duco/__init__.py
+    duco/const.py
+
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
