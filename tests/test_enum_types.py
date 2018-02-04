@@ -1,5 +1,5 @@
 """Test methods in duco/modbus.py."""
-from duco.const import (DUCO_MODULE_TYPE_MASTER, 
+from duco.const import (DUCO_MODULE_TYPE_MASTER,
                         DUCO_MODULE_TYPE_ACTUATOR_PRINT)
 from duco.enum_types import (ModuleType)
 import unittest
@@ -11,5 +11,5 @@ class TestModuleType(unittest.TestCase):
             self.assertTrue(ModuleType.supported(x), "msg")
 
         self.assertFalse(ModuleType.supported(DUCO_MODULE_TYPE_MASTER-1), "")
-        self.assertFalse(ModuleType.supported(DUCO_MODULE_TYPE_ACTUATOR_PRINT+1)
-                         , "")
+        self.assertFalse(ModuleType.supported(
+            DUCO_MODULE_TYPE_ACTUATOR_PRINT+1), "")
