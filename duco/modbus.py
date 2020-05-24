@@ -3,6 +3,8 @@ import logging
 import struct
 import threading
 
+from pymodbus.client.sync import ModbusSerialClient, ModbusTcpClient
+
 from duco.const import (
     PROJECT_PACKAGE_NAME,
     DUCO_REG_ADDR_INPUT_MODULE_TYPE)
@@ -38,17 +40,15 @@ def setup_modbus(config):
     client_type = config[CONF_TYPE]
 
     if client_type == 'serial':
-        from pymodbus.client.sync import ModbusSerialClient as ModbusClient
-        client = ModbusClient(method=config[CONF_METHOD],
-                              port=config[CONF_PORT],
-                              baudrate=config[CONF_BAUDRATE],
-                              stopbits=config[CONF_STOPBITS],
-                              bytesize=config[CONF_BYTESIZE],
-                              parity=config[CONF_PARITY])
+        client = ModbusSerialClient(method=config[CONF_METHOD],
+                                    port=config[CONF_PORT],
+                                    baudrate=config[CONF_BAUDRATE],
+                                    stopbits=config[CONF_STOPBITS],
+                                    bytesize=config[CONF_BYTESIZE],
+                                    parity=config[CONF_PARITY])
     elif client_type == 'tcp':
-        from pymodbus.client.sync import ModbusTcpClient as ModbusClient
-        client = ModbusClient(host=config[CONF_HOST],
-                              port=config[CONF_PORT])
+        client = ModbusTcpClient(host=config[CONF_HOST],
+                                 port=config[CONF_PORT])
     else:
         return False
 
@@ -92,7 +92,7 @@ def to_register_addr(node_id, param_id):
     return node_id*10 + param_id
 
 
-class ModbusHub(object):
+class ModbusHub:
     """Thread safe wrapper class for pymodbus."""
 
     def __init__(self, modbus_client, modbus_master_unit_id):
@@ -160,7 +160,7 @@ class ModbusHub(object):
                 **self._kwargs)
 
 
-class ModbusRegister(object):
+class ModbusRegister:
     """Modbus register."""
 
     def __init__(self, name, register, register_type,

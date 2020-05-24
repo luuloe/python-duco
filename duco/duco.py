@@ -12,8 +12,8 @@ from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_MASTER_UNIT_ID,
 from duco.nodes import (enumerate_node_tree)
 
 
-def create_config(modbus_client_type, modbus_client_port,
-                  modbus_master_unit_id):
+def create_config(modbus_client_type,
+                  modbus_client_port, modbus_master_unit_id):
     """Create config dictionary."""
     config = {CONF_TYPE: str(modbus_client_type),
               CONF_PORT: str(modbus_client_port),
@@ -33,7 +33,7 @@ def create_config(modbus_client_type, modbus_client_port,
     return config
 
 
-class DucoSystem(object):
+class DucoSystem:
     """The summary line for a class docstring should fit on one line.
 
     If the class has public attributes, they may be documented here
