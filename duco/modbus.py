@@ -3,7 +3,7 @@ import logging
 import struct
 import threading
 
-from pymodbus.client.sync import ModbusSerialClient, ModbusTcpClient
+#from pymodbus.client.sync import ModbusSerialClient, ModbusTcpClient
 
 from duco.const import (
     PROJECT_PACKAGE_NAME,
@@ -40,6 +40,7 @@ def setup_modbus(config):
     client_type = config[CONF_TYPE]
 
     if client_type == 'serial':
+        from pymodbus.client.sync import ModbusSerialClient
         client = ModbusSerialClient(method=config[CONF_METHOD],
                                     port=config[CONF_PORT],
                                     baudrate=config[CONF_BAUDRATE],
@@ -47,6 +48,7 @@ def setup_modbus(config):
                                     bytesize=config[CONF_BYTESIZE],
                                     parity=config[CONF_PARITY])
     elif client_type == 'tcp':
+        from pymodbus.client.sync import ModbusTcpClient
         client = ModbusTcpClient(host=config[CONF_HOST],
                                  port=config[CONF_PORT])
     else:
