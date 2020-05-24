@@ -5,7 +5,7 @@ matrix:
     - python: "3.7"
       env: TOXENV=lint
     - python: "3.7"
-      env: TOXENV=pylint
+      env: TOXENV=pylint TRAVIS_WAIT=30
     - python: "3.6"
       env: TOXENV=py36
     - python: "3.7"
@@ -15,7 +15,6 @@ matrix:
 
 cache:
   pip: true
-install: pip install -U tox coveralls
+install: pip install -U tox
 language: python
-script: travis_wait tox
-after_success: coveralls
+script: ${TRAVIS_WAIT:+travis_wait $TRAVIS_WAIT} tox
