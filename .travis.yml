@@ -5,7 +5,7 @@ matrix:
     - python: "3.7"
       env: TOXENV=lint
     - python: "3.7"
-      env: TOXENV=pylint TRAVIS_WAIT=30
+      env: TOXENV=pylint
     - python: "3.6"
       env: TOXENV=py36
     - python: "3.7"
@@ -13,8 +13,6 @@ matrix:
     - python: "3.8"
       env: TOXENV=py38
 
-cache:
-  pip: true
-install: pip install -U tox
+install: pip install tox
 language: python
-script: ${TRAVIS_WAIT:+travis_wait $TRAVIS_WAIT} tox
+script: tox
