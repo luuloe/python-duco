@@ -3,8 +3,6 @@ import logging
 import struct
 import threading
 
-#from pymodbus.client.sync import ModbusSerialClient, ModbusTcpClient
-
 from duco.const import (
     PROJECT_PACKAGE_NAME,
     DUCO_REG_ADDR_INPUT_MODULE_TYPE)

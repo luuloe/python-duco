@@ -39,5 +39,10 @@ disable=
   too-many-statements,
   unused-argument
 
+[IMPORT]
+allow-any-import-level=
+  pymodbus.client.sync.ModbusSerialClient,
+  pymodbus.client.sync.ModbusTcpClient
+
 [EXCEPTIONS]
 overgeneral-exceptions=Exception
