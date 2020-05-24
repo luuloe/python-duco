@@ -48,7 +48,7 @@ def enumerate_node_tree():
     return node_list
 
 
-class Node(object):
+class Node:
     """Duco base node."""
 
     # Create based on ModuleType:
@@ -57,17 +57,17 @@ class Node(object):
         """Create Node based on node_id and node_type."""
         if node_type == ModuleType.MASTER:
             return BoxNode(node_id, node_type)
-        elif node_type == ModuleType.VALVE_SENSORLESS:
+        if node_type == ModuleType.VALVE_SENSORLESS:
             return SensorlessValveNode(node_id, node_type)
-        elif node_type == ModuleType.VALVE_CO2:
+        if node_type == ModuleType.VALVE_CO2:
             return CO2ValveNode(node_id, node_type)
-        elif node_type == ModuleType.VALVE_RH:
+        if node_type == ModuleType.VALVE_RH:
             return RHValveNode(node_id, node_type)
-        elif node_type == ModuleType.USER_CONTROLLER:
+        if node_type == ModuleType.USER_CONTROLLER:
             return UserControllerNode(node_id, node_type)
-        elif node_type == ModuleType.ROOM_SENSOR_CO2:
+        if node_type == ModuleType.ROOM_SENSOR_CO2:
             return CO2SensorNode(node_id, node_type)
-        elif node_type == ModuleType.ROOM_SENSOR_RH:
+        if node_type == ModuleType.ROOM_SENSOR_RH:
             return RHSensorNode(node_id, node_type)
         assert 0, "ModuleType not implemented: " + ModuleType(node_type)
 
@@ -142,10 +142,11 @@ class Node(object):
     def state(self):
         """Return the state of the node."""
         return (self._reg_action.state, self._reg_status.state,
-                self._reg_zone.state)
+                self._reg_zone.state, self._reg_fan_actual.state,
+                self._reg_setpoint.state)
 
 
-class AutoMinMaxCapable(object):
+class AutoMinMaxCapable:
     """Duco node containing AutoMin and AutoMax registers."""
 
     def __init__(self, node_id):
@@ -193,7 +194,7 @@ class BoxNode(Node, AutoMinMaxCapable):
         return Node.state(self) + AutoMinMaxCapable.state(self)
 
 
-class TemperatureSensor(object):
+class TemperatureSensor:
     """TemperatureSensor base class."""
 
     def __init__(self, node_id):
@@ -246,7 +247,7 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
                 TemperatureSensor.state(self), self._reg_flow.state)
 
 
-class CO2Sensor(object):
+class CO2Sensor:
     """CO2Sensor base class."""
 
     def __init__(self, node_id):
@@ -283,7 +284,7 @@ class CO2Sensor(object):
         return (self._reg_co2_setpoint.state, self._reg_co2_value.state)
 
 
-class RHSensor(object):
+class RHSensor:
     """RHSensor base class."""
 
     def __init__(self, node_id):
@@ -333,7 +334,7 @@ class RHSensor(object):
                 self._reg_rh_delta.state)
 
 
-class UserController(object):
+class UserController:
     """UserController base class."""
 
     def __init__(self, node_id):

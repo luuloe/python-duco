@@ -105,3 +105,6 @@ ENV/
 .pydevproject
 .settings/*
 .external*
+
+# Visual Studio Code
+.vscode/
