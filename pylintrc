@@ -42,7 +42,9 @@ disable=
 [IMPORT]
 allow-any-import-level=
   pymodbus.client.sync.ModbusSerialClient,
-  pymodbus.client.sync.ModbusTcpClient
+  pymodbus.client.sync.ModbusTcpClient,
+  pymodbus.client.sync.ModbusUdpClient,
+  pymodbus.transaction.ModbusRtuFramer
 
 [EXCEPTIONS]
 overgeneral-exceptions=Exception

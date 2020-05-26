@@ -26,52 +26,32 @@ from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
 from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
 from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
                          DATA_TYPE_INT, to_register_addr,
-                         probe_node_id, ModbusRegister)
-
-
-def enumerate_node_tree():
-    """Enumerate Duco module tree."""
-    node_id = 1
-    node_found = True
-    node_list = []
-
-    while node_found:
-        node_type = probe_node_id(node_id)
-
-        if node_type is False:
-            node_found = False
-        else:
-            node_list.append(Node.factory(node_id, node_type))
-
-        node_id = node_id + 1
-
-    return node_list
-
+                         ModbusRegister)
 
 class Node:
     """Duco base node."""
 
     # Create based on ModuleType:
     @staticmethod
-    def factory(node_id, node_type):
+    def factory(node_id, node_type, modbus_hub):
         """Create Node based on node_id and node_type."""
         if node_type == ModuleType.MASTER:
-            return BoxNode(node_id, node_type)
+            return BoxNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.VALVE_SENSORLESS:
-            return SensorlessValveNode(node_id, node_type)
+            return SensorlessValveNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.VALVE_CO2:
-            return CO2ValveNode(node_id, node_type)
+            return CO2ValveNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.VALVE_RH:
-            return RHValveNode(node_id, node_type)
+            return RHValveNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.USER_CONTROLLER:
-            return UserControllerNode(node_id, node_type)
+            return UserControllerNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.ROOM_SENSOR_CO2:
-            return CO2SensorNode(node_id, node_type)
+            return CO2SensorNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.ROOM_SENSOR_RH:
-            return RHSensorNode(node_id, node_type)
+            return RHSensorNode(node_id, node_type, modbus_hub)
         assert 0, "ModuleType not implemented: " + ModuleType(node_type)
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize Node base."""
         self._node_id = int(node_id)
         self._node_type = ModuleType(node_type)
@@ -81,27 +61,32 @@ class Node:
         # unit_of_measurement, count, scale, offset, data_type, precision
         # input
         self._reg_status = ModbusRegister(
+            modbus_hub,
             'Zone status',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_STATUS),
             REGISTER_TYPE_INPUT, '', 1, 1,
             DUCO_ZONE_STATUS_OFFSET, DATA_TYPE_INT, 0)
 
         self._reg_fan_actual = ModbusRegister(
+            modbus_hub,
             'Fan actual',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_FAN_ACTUAL),
             REGISTER_TYPE_INPUT, '%', 1, 1, 0, DATA_TYPE_INT, 0)
 
         self._reg_zone = ModbusRegister(
+            modbus_hub,
             'Zone',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_GROUP),
             REGISTER_TYPE_INPUT, '', 1, 1, 0, DATA_TYPE_INT, 0)
         # holding
         self._reg_setpoint = ModbusRegister(
+            modbus_hub,
             'Zone setpoint',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_FAN_SETPOINT),
             REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
 
         self._reg_action = ModbusRegister(
+            modbus_hub,
             'Zone action',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_ACTION),
             REGISTER_TYPE_HOLDING, '', 1, 1,
@@ -149,14 +134,16 @@ class Node:
 class AutoMinMaxCapable:
     """Duco node containing AutoMin and AutoMax registers."""
 
-    def __init__(self, node_id):
+    def __init__(self, node_id, modbus_hub):
         """Initialize AutoMinMaxCapable."""
         self._reg_automin = ModbusRegister(
+            modbus_hub,
             'AutoMin',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_AUTOMIN),
             REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
 
         self._reg_automax = ModbusRegister(
+            modbus_hub,
             'AutoMax',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_AUTOMAX),
             REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
@@ -183,10 +170,10 @@ class AutoMinMaxCapable:
 class BoxNode(Node, AutoMinMaxCapable):
     """Duco box node."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize BoxNode node."""
-        Node.__init__(self, node_id, node_type)
-        AutoMinMaxCapable.__init__(self, node_id)
+        Node.__init__(self, node_id, node_type, modbus_hub)
+        AutoMinMaxCapable.__init__(self, node_id, modbus_hub)
         # no additional registers
 
     def state(self):
@@ -197,10 +184,11 @@ class BoxNode(Node, AutoMinMaxCapable):
 class TemperatureSensor:
     """TemperatureSensor base class."""
 
-    def __init__(self, node_id):
+    def __init__(self, node_id, modbus_hub):
         """Initialize TemperatureSensor base class."""
         # input
         self._reg_temperature = ModbusRegister(
+            modbus_hub,
             'Temperature',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_TEMPERATURE),
             REGISTER_TYPE_INPUT, '°C', 1, DUCO_TEMPERATURE_SCALE_FACTOR,
@@ -221,14 +209,15 @@ class TemperatureSensor:
 class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
     """Valve base class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize Valve base class."""
-        Node.__init__(self, node_id, node_type)
-        AutoMinMaxCapable.__init__(self, node_id)
-        TemperatureSensor.__init__(self, node_id)
+        Node.__init__(self, node_id, node_type, modbus_hub)
+        AutoMinMaxCapable.__init__(self, node_id, modbus_hub)
+        TemperatureSensor.__init__(self, node_id, modbus_hub)
 
         # holding
         self._reg_flow = ModbusRegister(
+            modbus_hub,
             'Flow',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_FLOW),
             REGISTER_TYPE_HOLDING, 'm3/h', 1, 1, 0, DATA_TYPE_INT, 0)
@@ -250,16 +239,18 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
 class CO2Sensor:
     """CO2Sensor base class."""
 
-    def __init__(self, node_id):
+    def __init__(self, node_id, modbus_hub):
         """Initialize CO2Sensor base class."""
         # input
         self._reg_co2_value = ModbusRegister(
+            modbus_hub,
             'CO2 value',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_CO2_ACTUAL),
             REGISTER_TYPE_INPUT, 'ppm', 1, 1,
             0, DATA_TYPE_INT, 0)
         # holding
         self._reg_co2_setpoint = ModbusRegister(
+            modbus_hub,
             'CO2 setpoint',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_CO2_SETPOINT),
             REGISTER_TYPE_HOLDING, 'ppm', 1, 1,
@@ -287,21 +278,24 @@ class CO2Sensor:
 class RHSensor:
     """RHSensor base class."""
 
-    def __init__(self, node_id):
+    def __init__(self, node_id, modbus_hub):
         """Initialize RHSensor base class."""
         # input
         self._reg_rh_value = ModbusRegister(
+            modbus_hub,
             'RH value',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_RH_ACTUAL),
             REGISTER_TYPE_INPUT, '%', 1, DUCO_RH_SCALE_FACTOR,
             0, DATA_TYPE_INT, DUCO_RH_PRECISION)
         # holding
         self._reg_rh_setpoint = ModbusRegister(
+            modbus_hub,
             'RH setpoint',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_RH_SETPOINT),
             REGISTER_TYPE_HOLDING, '%', 1, 1,
             0, DATA_TYPE_INT, 0)
         self._reg_rh_delta = ModbusRegister(
+            modbus_hub,
             'RH delta',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_RH_DELTA),
             REGISTER_TYPE_HOLDING, '-', 1, 1,
@@ -337,25 +331,29 @@ class RHSensor:
 class UserController:
     """UserController base class."""
 
-    def __init__(self, node_id):
+    def __init__(self, node_id, modbus_hub):
         """Initialize UserController base class."""
         # holding
         self._reg_button_1 = ModbusRegister(
+            modbus_hub,
             'Button 1',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_1),
             REGISTER_TYPE_HOLDING, '%', 1, 1,
             0, DATA_TYPE_INT, 0)
         self._reg_button_2 = ModbusRegister(
+            modbus_hub,
             'Button 2',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_2),
             REGISTER_TYPE_HOLDING, '%', 1, 1,
             0, DATA_TYPE_INT, 0)
         self._reg_button_3 = ModbusRegister(
+            modbus_hub,
             'Button 3',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_3),
             REGISTER_TYPE_HOLDING, '%', 1, 1,
             0, DATA_TYPE_INT, 0)
         self._reg_manual_time = ModbusRegister(
+            modbus_hub,
             'Manual time',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_MANUAL_TIME),
             REGISTER_TYPE_HOLDING, 'minutes', 1, 1,
@@ -398,18 +396,18 @@ class UserController:
 class SensorlessValveNode(Valve):
     """Valve base class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize Valve base class."""
-        Valve.__init__(self, node_id, node_type)
+        Valve.__init__(self, node_id, node_type, modbus_hub)
 
 
 class CO2ValveNode(Valve, CO2Sensor):
     """CO2ValveNode class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize CO2ValveNode."""
-        Valve.__init__(self, node_id, node_type)
-        CO2Sensor.__init__(self, node_id)
+        Valve.__init__(self, node_id, node_type, modbus_hub)
+        CO2Sensor.__init__(self, node_id, modbus_hub)
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -419,10 +417,10 @@ class CO2ValveNode(Valve, CO2Sensor):
 class RHValveNode(Valve, RHSensor):
     """RHValveNode class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize RHValveNode."""
-        Valve.__init__(self, node_id, node_type)
-        RHSensor.__init__(self, node_id)
+        Valve.__init__(self, node_id, node_type, modbus_hub)
+        RHSensor.__init__(self, node_id, modbus_hub)
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -432,10 +430,10 @@ class RHValveNode(Valve, RHSensor):
 class UserControllerNode(Node, UserController):
     """UserControllerNode class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize UserControllerNode."""
-        Node.__init__(self, node_id, node_type)
-        UserController.__init__(self, node_id)
+        Node.__init__(self, node_id, node_type, modbus_hub)
+        UserController.__init__(self, node_id, modbus_hub)
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -445,11 +443,11 @@ class UserControllerNode(Node, UserController):
 class CO2SensorNode(Node, UserController, CO2Sensor):
     """CO2SensorNode class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize CO2SensorNode."""
-        Node.__init__(self, node_id, node_type)
-        UserController.__init__(self, node_id)
-        CO2Sensor.__init__(self, node_id)
+        Node.__init__(self, node_id, node_type, modbus_hub)
+        UserController.__init__(self, node_id, modbus_hub)
+        CO2Sensor.__init__(self, node_id, modbus_hub)
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -460,11 +458,11 @@ class CO2SensorNode(Node, UserController, CO2Sensor):
 class RHSensorNode(Node, UserController, RHSensor):
     """RHSensorNode class."""
 
-    def __init__(self, node_id, node_type):
+    def __init__(self, node_id, node_type, modbus_hub):
         """Initialize RHSensorNode."""
-        Node.__init__(self, node_id, node_type)
-        UserController.__init__(self, node_id)
-        RHSensor.__init__(self, node_id)
+        Node.__init__(self, node_id, node_type, modbus_hub)
+        UserController.__init__(self, node_id, modbus_hub)
+        RHSensor.__init__(self, node_id, modbus_hub)
 
     def state(self):
         """Return the state of the node as a tuple."""

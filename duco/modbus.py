@@ -4,10 +4,7 @@ import struct
 import threading
 
 from duco.const import (
-    PROJECT_PACKAGE_NAME,
-    DUCO_REG_ADDR_INPUT_MODULE_TYPE)
-from duco.enum_types import (ModuleType)
-
+    PROJECT_PACKAGE_NAME)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 
@@ -21,71 +18,13 @@ CONF_BYTESIZE = 'bytesize'
 CONF_STOPBITS = 'stopbits'
 CONF_TYPE = 'type'
 CONF_PARITY = 'parity'
+CONF_TIMEOUT = 'timeout'
 
 REGISTER_TYPE_HOLDING = 'holding'
 REGISTER_TYPE_INPUT = 'input'
 
 DATA_TYPE_INT = 'int'
 DATA_TYPE_FLOAT = 'float'
-
-# Global variable containing Modbus hub
-MODBUSHUB = None
-
-
-def setup_modbus(config):
-    """Create and configure Modbus Hub."""
-    _LOGGER.debug("setup modbus")
-    client_type = config[CONF_TYPE]
-
-    if client_type == 'serial':
-        from pymodbus.client.sync import ModbusSerialClient
-        client = ModbusSerialClient(method=config[CONF_METHOD],
-                                    port=config[CONF_PORT],
-                                    baudrate=config[CONF_BAUDRATE],
-                                    stopbits=config[CONF_STOPBITS],
-                                    bytesize=config[CONF_BYTESIZE],
-                                    parity=config[CONF_PARITY])
-    elif client_type == 'tcp':
-        from pymodbus.client.sync import ModbusTcpClient
-        client = ModbusTcpClient(host=config[CONF_HOST],
-                                 port=config[CONF_PORT])
-    else:
-        return False
-
-    global MODBUSHUB
-    MODBUSHUB = ModbusHub(client, config[CONF_MASTER_UNIT_ID])
-    # time to connect
-    MODBUSHUB.connect()
-
-    return True
-
-
-def probe_node_id(node_id):
-    """Probe Modbus for node_id module type."""
-    _LOGGER.debug("probe node_id %d", node_id)
-    modbus_result = MODBUSHUB.read_input_registers(
-        to_register_addr(node_id, DUCO_REG_ADDR_INPUT_MODULE_TYPE), 1)
-    try:
-        register = modbus_result.registers
-        response = register[0]
-    except AttributeError:
-        _LOGGER.debug("No response from node_id %d", node_id)
-        return False
-
-    if ModuleType.supported(response):
-        module_type = ModuleType(response)
-        _LOGGER.debug("node_id %d is a module of type %s",
-                      node_id, module_type)
-        return module_type
-
-    return False
-
-
-def close_modbus():
-    """Close Modbus hub."""
-    _LOGGER.debug("close modbus")
-    MODBUSHUB.close()
-
 
 def to_register_addr(node_id, param_id):
     """Compute modbus address from node_id and param_id."""
@@ -95,11 +34,73 @@ def to_register_addr(node_id, param_id):
 class ModbusHub:
     """Thread safe wrapper class for pymodbus."""
 
-    def __init__(self, modbus_client, modbus_master_unit_id):
+    def __init__(self, client_config):
         """Initialize the modbus hub."""
-        self._client = modbus_client
-        self._kwargs = {'unit': modbus_master_unit_id}
+
+        # generic configuration
+        self._client = None
+        self._kwargs = {'unit': client_config[CONF_MASTER_UNIT_ID]}
         self._lock = threading.Lock()
+        #self._config_name = client_config[CONF_NAME]
+        self._config_type = client_config[CONF_TYPE]
+        self._config_port = client_config[CONF_PORT]
+        self._config_timeout = client_config[CONF_TIMEOUT]
+        self._config_delay = 0
+
+        if self._config_type == "serial":
+            # serial configuration
+            self._config_method = client_config[CONF_METHOD]
+            self._config_baudrate = client_config[CONF_BAUDRATE]
+            self._config_stopbits = client_config[CONF_STOPBITS]
+            self._config_bytesize = client_config[CONF_BYTESIZE]
+            self._config_parity = client_config[CONF_PARITY]
+        else:
+            # network configuration
+            self._config_host = client_config[CONF_HOST]
+            #self._config_delay = client_config[CONF_DELAY]
+
+    def setup(self):
+        """Set up pymodbus client."""
+        if self._config_type == "serial":
+            from pymodbus.client.sync import ModbusSerialClient
+            self._client = ModbusSerialClient(
+                method=self._config_method,
+                port=self._config_port,
+                baudrate=self._config_baudrate,
+                stopbits=self._config_stopbits,
+                bytesize=self._config_bytesize,
+                parity=self._config_parity,
+                timeout=self._config_timeout,
+                retry_on_empty=True,
+            )
+        elif self._config_type == "rtuovertcp":
+            from pymodbus.client.sync import ModbusTcpClient
+            from pymodbus.transaction import ModbusRtuFramer
+            self._client = ModbusTcpClient(
+                host=self._config_host,
+                port=self._config_port,
+                framer=ModbusRtuFramer,
+                timeout=self._config_timeout,
+            )
+        elif self._config_type == "tcp":
+            from pymodbus.client.sync import ModbusTcpClient
+            self._client = ModbusTcpClient(
+                host=self._config_host,
+                port=self._config_port,
+                timeout=self._config_timeout,
+            )
+        elif self._config_type == "udp":
+            from pymodbus.client.sync import ModbusUdpClient
+            self._client = ModbusUdpClient(
+                host=self._config_host,
+                port=self._config_port,
+                timeout=self._config_timeout,
+            )
+        else:
+            assert False
+
+        # Connect device
+        self.connect()
 
     def close(self):
         """Disconnect client."""
@@ -163,10 +164,11 @@ class ModbusHub:
 class ModbusRegister:
     """Modbus register."""
 
-    def __init__(self, name, register, register_type,
+    def __init__(self, hub, name, register, register_type,
                  unit_of_measurement, count, scale, offset, data_type,
                  precision):
         """Initialize the modbus register."""
+        self._hub = hub
         self._name = name
         self._register = int(register)
         self._register_type = register_type
@@ -204,11 +206,11 @@ class ModbusRegister:
     def update(self):
         """Update the value of the register."""
         if self._register_type == REGISTER_TYPE_INPUT:
-            result = MODBUSHUB.read_input_registers(
+            result = self._hub.read_input_registers(
                 self._register,
                 self._count)
         else:
-            result = MODBUSHUB.read_holding_registers(
+            result = self._hub.read_holding_registers(
                 self._register,
                 self._count)
         val = 0
