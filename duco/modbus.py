@@ -26,6 +26,7 @@ REGISTER_TYPE_INPUT = 'input'
 DATA_TYPE_INT = 'int'
 DATA_TYPE_FLOAT = 'float'
 
+
 def to_register_addr(node_id, param_id):
     """Compute modbus address from node_id and param_id."""
     return node_id*10 + param_id
@@ -41,7 +42,6 @@ class ModbusHub:
         self._client = None
         self._kwargs = {'unit': client_config[CONF_MASTER_UNIT_ID]}
         self._lock = threading.Lock()
-        #self._config_name = client_config[CONF_NAME]
         self._config_type = client_config[CONF_TYPE]
         self._config_port = client_config[CONF_PORT]
         self._config_timeout = client_config[CONF_TIMEOUT]
@@ -57,7 +57,6 @@ class ModbusHub:
         else:
             # network configuration
             self._config_host = client_config[CONF_HOST]
-            #self._config_delay = client_config[CONF_DELAY]
 
     def setup(self):
         """Set up pymodbus client."""

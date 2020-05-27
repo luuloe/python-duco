@@ -53,7 +53,8 @@ def main():
 
     configure_logging()
 
-    with DucoBox(args.modbus_type, args.modbus_port, args.modbus_host) as duco_box:
+    with DucoBox(args.modbus_type, args.modbus_port,
+                 args.modbus_host) as duco_box:
         for node in duco_box.node_list:
             print(node.node_type)
             print(node.state())

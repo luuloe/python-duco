@@ -28,6 +28,7 @@ from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
                          DATA_TYPE_INT, to_register_addr,
                          ModbusRegister)
 
+
 class Node:
     """Duco base node."""
 

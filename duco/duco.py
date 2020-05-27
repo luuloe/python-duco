@@ -14,10 +14,10 @@ from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_MASTER_UNIT_ID,
                          CONF_PARITY, CONF_HOST, CONF_METHOD,
                          CONF_TIMEOUT, ModbusHub)
 
-#from duco.nodes import (enumerate_node_tree)
 from duco.nodes import (to_register_addr, Node)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
+
 
 def create_client_config(modbus_client_type, modbus_client_port,
                          modbus_client_host, modbus_master_unit_id):
@@ -79,8 +79,10 @@ class DucoBox:
             param3 (:obj:`list` of :obj:`str`): Description of `param3`.
 
         """
-        client_config = create_client_config(modbus_client_type, modbus_client_port,
-                                             modbus_client_host, modbus_master_unit_id)
+        client_config = create_client_config(modbus_client_type,
+                                             modbus_client_port,
+                                             modbus_client_host,
+                                             modbus_master_unit_id)
         self._modbus_hub = ModbusHub(client_config)
         self.node_list = list()
 
@@ -106,7 +108,8 @@ class DucoBox:
             if node_type is False:
                 node_found = False
             else:
-                self.node_list.append(Node.factory(node_id, node_type, self._modbus_hub))
+                self.node_list.append(
+                    Node.factory(node_id, node_type, self._modbus_hub))
 
             node_id = node_id + 1
 
