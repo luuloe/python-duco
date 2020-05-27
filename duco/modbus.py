@@ -4,7 +4,10 @@ import struct
 import threading
 
 from duco.const import (
-    PROJECT_PACKAGE_NAME)
+    PROJECT_PACKAGE_NAME,
+    DUCO_MODBUS_BAUD_RATE,
+    DUCO_MODBUS_BYTE_SIZE, DUCO_MODBUS_STOP_BITS,
+    DUCO_MODBUS_PARITY, DUCO_MODBUS_METHOD)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 
@@ -27,6 +30,28 @@ DATA_TYPE_INT = 'int'
 DATA_TYPE_FLOAT = 'float'
 
 
+def create_client_config(modbus_client_type, modbus_client_port,
+                         modbus_client_host=None, modbus_master_unit_id=0):
+    """Create config dictionary."""
+    config = {CONF_TYPE: str(modbus_client_type),
+              CONF_PORT: str(modbus_client_port),
+              CONF_MASTER_UNIT_ID: int(modbus_master_unit_id),
+              CONF_TIMEOUT: int(3)}
+    # type specific part
+    if modbus_client_type == 'serial':
+        config[CONF_METHOD] = DUCO_MODBUS_METHOD
+        config[CONF_BAUDRATE] = DUCO_MODBUS_BAUD_RATE
+        config[CONF_BYTESIZE] = DUCO_MODBUS_BYTE_SIZE
+        config[CONF_STOPBITS] = DUCO_MODBUS_STOP_BITS
+        config[CONF_PARITY] = DUCO_MODBUS_PARITY
+    elif modbus_client_type == 'tcp':
+        config[CONF_HOST] = str(modbus_client_host)
+    else:
+        raise ValueError("modbus_client_type must be serial or tcp")
+
+    return config
+
+
 def to_register_addr(node_id, param_id):
     """Compute modbus address from node_id and param_id."""
     return node_id*10 + param_id
@@ -37,7 +62,6 @@ class ModbusHub:
 
     def __init__(self, client_config):
         """Initialize the modbus hub."""
-
         # generic configuration
         self._client = None
         self._kwargs = {'unit': client_config[CONF_MASTER_UNIT_ID]}

@@ -3,42 +3,13 @@ import logging
 
 from duco.const import (
     PROJECT_PACKAGE_NAME, DUCO_REG_ADDR_INPUT_MODULE_TYPE,
-    DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID, DUCO_MODBUS_BAUD_RATE,
-    DUCO_MODBUS_BYTE_SIZE, DUCO_MODBUS_STOP_BITS,
-    DUCO_MODBUS_PARITY, DUCO_MODBUS_METHOD)
+    DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID)
 
 from duco.enum_types import (ModuleType)
-
-from duco.modbus import (CONF_TYPE, CONF_PORT, CONF_MASTER_UNIT_ID,
-                         CONF_BAUDRATE, CONF_BYTESIZE, CONF_STOPBITS,
-                         CONF_PARITY, CONF_HOST, CONF_METHOD,
-                         CONF_TIMEOUT, ModbusHub)
-
+from duco.modbus import (create_client_config, ModbusHub)
 from duco.nodes import (to_register_addr, Node)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
-
-
-def create_client_config(modbus_client_type, modbus_client_port,
-                         modbus_client_host, modbus_master_unit_id):
-    """Create config dictionary."""
-    config = {CONF_TYPE: str(modbus_client_type),
-              CONF_PORT: str(modbus_client_port),
-              CONF_MASTER_UNIT_ID: int(modbus_master_unit_id),
-              CONF_TIMEOUT: int(3)}
-    # type specific part
-    if modbus_client_type == 'serial':
-        config[CONF_METHOD] = DUCO_MODBUS_METHOD
-        config[CONF_BAUDRATE] = DUCO_MODBUS_BAUD_RATE
-        config[CONF_BYTESIZE] = DUCO_MODBUS_BYTE_SIZE
-        config[CONF_STOPBITS] = DUCO_MODBUS_STOP_BITS
-        config[CONF_PARITY] = DUCO_MODBUS_PARITY
-    elif modbus_client_type == 'tcp':
-        config[CONF_HOST] = str(modbus_client_host)
-    else:
-        raise ValueError("modbus_client_type must be serial or tcp")
-
-    return config
 
 
 class DucoBox:
@@ -97,7 +68,7 @@ class DucoBox:
         self._modbus_hub.close()
 
     def __enumerate_node_tree(self):
-        """Enumerate Duco module tree."""
+        """Enumerate Duco node tree."""
         node_id = 1
         node_found = True
         self.node_list = list()

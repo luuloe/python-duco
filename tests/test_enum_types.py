@@ -1,8 +1,8 @@
 """Test methods in duco/modbus.py."""
+import unittest
 from duco.const import (DUCO_MODULE_TYPE_MASTER,
                         DUCO_MODULE_TYPE_ACTUATOR_PRINT)
 from duco.enum_types import (ModuleType)
-import unittest
 
 
 class TestModuleType(unittest.TestCase):
