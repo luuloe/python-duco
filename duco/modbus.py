@@ -57,6 +57,13 @@ def to_register_addr(node_id, param_id):
     return node_id*10 + param_id
 
 
+def twos_comp(val, bits):
+    """compute the 2's complement of int value val"""
+    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)        # compute negative value
+    return val                         # return positive value as is
+
+
 class ModbusHub:
     """Thread safe wrapper class for pymodbus."""
 
@@ -203,6 +210,12 @@ class ModbusRegister:
         self._data_type = data_type
         self._value = None
 
+    def __str__(self):
+        """Return the string representation of the register."""
+        self.update()
+        return (" " + self._name + ": " + str(self._value) +
+                " " + self._unit_of_measurement)
+
     @property
     def value(self):
         """Return the value of the register."""
@@ -250,7 +263,7 @@ class ModbusRegister:
             )
             val = struct.unpack(">f", byte_string)[0]
         elif self._data_type == DATA_TYPE_INT:
-            for i, res in enumerate(registers):
-                val += res * (2**(i*16))
+            for _, res in enumerate(registers):
+                val += twos_comp(res, 16)
         self._value = format(
             self._scale * val + self._offset, '.{}f'.format(self._precision))

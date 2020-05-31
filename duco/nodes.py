@@ -93,6 +93,16 @@ class Node:
             REGISTER_TYPE_HOLDING, '', 1, 1,
             DUCO_ACTION_OFFSET, DATA_TYPE_INT, 0)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (" Node " + str(self._node_id) + ":\n" +
+                "      " + str(self._reg_status) + "\n" +
+                "      " + str(self._reg_fan_actual) + "\n" +
+                "      " + str(self._reg_zone) + "\n" +
+                "      " + str(self._reg_setpoint) + "\n" +
+                "      " + str(self._reg_action)
+               )
+
     @property
     def node_id(self):
         """Return the id of the node."""
@@ -149,6 +159,12 @@ class AutoMinMaxCapable:
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_AUTOMAX),
             REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return ("      " + str(self._reg_automin) + "\n" +
+                "      " + str(self._reg_automax)
+               )
+
     @property
     def auto_min(self):
         """Return the auto min of the node."""
@@ -179,7 +195,13 @@ class BoxNode(Node, AutoMinMaxCapable):
 
     def state(self):
         """Return the state of the node as a tuple."""
-        return Node.state(self) + AutoMinMaxCapable.state(self)
+        return (Node.state(self) + "\n" +
+                AutoMinMaxCapable.state(self))
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Node.__str__(self) + "\n" +
+                AutoMinMaxCapable.__str__(self))
 
 
 class TemperatureSensor:
@@ -194,6 +216,10 @@ class TemperatureSensor:
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_TEMPERATURE),
             REGISTER_TYPE_INPUT, '°C', 1, DUCO_TEMPERATURE_SCALE_FACTOR,
             0, DATA_TYPE_INT, DUCO_TEMPERATURE_PRECISION)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return "      " + str(self._reg_temperature)
 
     @property
     def temperature(self):
@@ -223,6 +249,14 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_FLOW),
             REGISTER_TYPE_HOLDING, 'm3/h', 1, 1, 0, DATA_TYPE_INT, 0)
         # holding
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Node.__str__(self) + "\n" +
+                AutoMinMaxCapable.__str__(self) + "\n" +
+                TemperatureSensor.__str__(self) + "\n" +
+                "      " + str(self._reg_flow)
+                )
 
     @property
     def flow(self):
@@ -256,6 +290,12 @@ class CO2Sensor:
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_CO2_SETPOINT),
             REGISTER_TYPE_HOLDING, 'ppm', 1, 1,
             0, DATA_TYPE_INT, 0)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return ("      " + str(self._reg_co2_value) + "\n" +
+                "      " + str(self._reg_co2_setpoint)
+               )
 
     @property
     def co2_value(self):
@@ -301,6 +341,13 @@ class RHSensor:
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_RH_DELTA),
             REGISTER_TYPE_HOLDING, '-', 1, 1,
             0, DATA_TYPE_INT, 0)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return ("      " + str(self._reg_rh_value) + "\n" +
+                "      " + str(self._reg_rh_setpoint) + "\n" +
+                "      " + str(self._reg_rh_delta)
+               )
 
     @property
     def rh_value(self):
@@ -360,6 +407,14 @@ class UserController:
             REGISTER_TYPE_HOLDING, 'minutes', 1, 1,
             0, DATA_TYPE_INT, 0)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return ("      " + str(self._reg_button_1) + "\n" +
+                "      " + str(self._reg_button_2) + "\n" +
+                "      " + str(self._reg_button_3) + "\n" +
+                "      " + str(self._reg_manual_time)
+               )
+
     @property
     def button1(self):
         """Return the current setpoint behind button 1."""
@@ -401,6 +456,9 @@ class SensorlessValveNode(Valve):
         """Initialize Valve base class."""
         Valve.__init__(self, node_id, node_type, modbus_hub)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return Valve.__str__(self)
 
 class CO2ValveNode(Valve, CO2Sensor):
     """CO2ValveNode class."""
@@ -409,6 +467,11 @@ class CO2ValveNode(Valve, CO2Sensor):
         """Initialize CO2ValveNode."""
         Valve.__init__(self, node_id, node_type, modbus_hub)
         CO2Sensor.__init__(self, node_id, modbus_hub)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Valve.__str__(self) + "\n" +
+                CO2Sensor.__str__(self))
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -423,6 +486,11 @@ class RHValveNode(Valve, RHSensor):
         Valve.__init__(self, node_id, node_type, modbus_hub)
         RHSensor.__init__(self, node_id, modbus_hub)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Valve.__str__(self) + "\n" +
+                RHSensor.__str__(self))
+
     def state(self):
         """Return the state of the node as a tuple."""
         return Valve.state(self) + RHSensor.state(self)
@@ -435,6 +503,11 @@ class UserControllerNode(Node, UserController):
         """Initialize UserControllerNode."""
         Node.__init__(self, node_id, node_type, modbus_hub)
         UserController.__init__(self, node_id, modbus_hub)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Node.__str__(self) + "\n" +
+                UserController.__str__(self))
 
     def state(self):
         """Return the state of the node as a tuple."""
@@ -450,10 +523,16 @@ class CO2SensorNode(Node, UserController, CO2Sensor):
         UserController.__init__(self, node_id, modbus_hub)
         CO2Sensor.__init__(self, node_id, modbus_hub)
 
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Node.__str__(self) + "\n" +
+                UserController.__str__(self) + "\n" +
+                CO2Sensor.__str__(self))
+
     def state(self):
         """Return the state of the node as a tuple."""
-        state = Node.state(self) + UserController.state(self)
-        return state + CO2Sensor.state(self)
+        return (Node.state(self) + UserController.state(self) +
+                CO2Sensor.state(self))
 
 
 class RHSensorNode(Node, UserController, RHSensor):
@@ -464,6 +543,13 @@ class RHSensorNode(Node, UserController, RHSensor):
         Node.__init__(self, node_id, node_type, modbus_hub)
         UserController.__init__(self, node_id, modbus_hub)
         RHSensor.__init__(self, node_id, modbus_hub)
+
+    def __str__(self):
+        """Return the string representation of the node."""
+        return (Node.__str__(self) + "\n" +
+                UserController.__str__(self) + "\n" +
+                RHSensor.__str__(self)
+               )
 
     def state(self):
         """Return the state of the node as a tuple."""
