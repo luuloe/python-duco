@@ -100,8 +100,7 @@ class Node:
                 "      " + str(self._reg_fan_actual) + "\n" +
                 "      " + str(self._reg_zone) + "\n" +
                 "      " + str(self._reg_setpoint) + "\n" +
-                "      " + str(self._reg_action)
-               )
+                "      " + str(self._reg_action))
 
     @property
     def node_id(self):
@@ -162,8 +161,7 @@ class AutoMinMaxCapable:
     def __str__(self):
         """Return the string representation of the node."""
         return ("      " + str(self._reg_automin) + "\n" +
-                "      " + str(self._reg_automax)
-               )
+                "      " + str(self._reg_automax))
 
     @property
     def auto_min(self):
@@ -255,8 +253,7 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
         return (Node.__str__(self) + "\n" +
                 AutoMinMaxCapable.__str__(self) + "\n" +
                 TemperatureSensor.__str__(self) + "\n" +
-                "      " + str(self._reg_flow)
-                )
+                "      " + str(self._reg_flow))
 
     @property
     def flow(self):
@@ -294,8 +291,7 @@ class CO2Sensor:
     def __str__(self):
         """Return the string representation of the node."""
         return ("      " + str(self._reg_co2_value) + "\n" +
-                "      " + str(self._reg_co2_setpoint)
-               )
+                "      " + str(self._reg_co2_setpoint))
 
     @property
     def co2_value(self):
@@ -346,8 +342,7 @@ class RHSensor:
         """Return the string representation of the node."""
         return ("      " + str(self._reg_rh_value) + "\n" +
                 "      " + str(self._reg_rh_setpoint) + "\n" +
-                "      " + str(self._reg_rh_delta)
-               )
+                "      " + str(self._reg_rh_delta))
 
     @property
     def rh_value(self):
@@ -412,8 +407,7 @@ class UserController:
         return ("      " + str(self._reg_button_1) + "\n" +
                 "      " + str(self._reg_button_2) + "\n" +
                 "      " + str(self._reg_button_3) + "\n" +
-                "      " + str(self._reg_manual_time)
-               )
+                "      " + str(self._reg_manual_time))
 
     @property
     def button1(self):
@@ -459,6 +453,7 @@ class SensorlessValveNode(Valve):
     def __str__(self):
         """Return the string representation of the node."""
         return Valve.__str__(self)
+
 
 class CO2ValveNode(Valve, CO2Sensor):
     """CO2ValveNode class."""
@@ -548,8 +543,7 @@ class RHSensorNode(Node, UserController, RHSensor):
         """Return the string representation of the node."""
         return (Node.__str__(self) + "\n" +
                 UserController.__str__(self) + "\n" +
-                RHSensor.__str__(self)
-               )
+                RHSensor.__str__(self))
 
     def state(self):
         """Return the state of the node as a tuple."""
