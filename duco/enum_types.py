@@ -52,10 +52,6 @@ class ZoneStatus(IntEnum):
     AWAY = DUCO_ZONE_STATUS_AWAY
     ERROR = DUCO_ZONE_STATUS_ERROR
 
-    def __str__(self):
-        """Return the string representation of the value."""
-        return 'my custom str!'
-
 
 @unique
 class ZoneAction(IntEnum):

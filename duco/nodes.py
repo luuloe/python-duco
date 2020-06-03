@@ -65,8 +65,7 @@ class Node:
             modbus_hub,
             'Zone status',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_STATUS),
-            REGISTER_TYPE_INPUT, '', 1, 1,
-            DUCO_ZONE_STATUS_OFFSET, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT, '', 1, 1, 0, DATA_TYPE_INT, 0)
 
         self._reg_fan_actual = ModbusRegister(
             modbus_hub,
@@ -90,15 +89,15 @@ class Node:
             modbus_hub,
             'Zone action',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_ACTION),
-            REGISTER_TYPE_HOLDING, '', 1, 1,
-            DUCO_ACTION_OFFSET, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '', 1, 1, 0, DATA_TYPE_INT, 0)
 
     def __str__(self):
         """Return the string representation of the node."""
-        return (" Node " + str(self._node_id) + ":\n" +
-                "      " + str(self._reg_status) + "\n" +
-                "      " + str(self._reg_fan_actual) + "\n" +
+        return (" Node " + str(self.node_id) + ":\n" +
+                "      " + str(self.node_type) + "\n" +
                 "      " + str(self._reg_zone) + "\n" +
+                "      " + str(self.status) + "\n" +
+                "      " + str(self._reg_fan_actual) + "\n" +
                 "      " + str(self._reg_setpoint) + "\n" +
                 "      " + str(self._reg_action))
 
@@ -117,15 +116,22 @@ class Node:
         """Return the zone action of the node."""
         # synchronous update for now
         self._reg_action.update()
-        return ZoneAction(self._reg_action.value)
+        return ZoneAction(int(self._reg_action.value) + DUCO_ACTION_OFFSET)
+
+    @property
+    def fan_actual(self):
+        """Return the actual fan value of the node."""
+        # synchronous update for now
+        self._reg_fan_actual.update()
+        return self._reg_fan_actual.value
 
     @property
     def status(self):
         """Return the zone status of the node."""
         # synchronous update for now
-        print(list(ZoneStatus))
         self._reg_status.update()
-        return ZoneStatus(self._reg_status.value)
+        return ZoneStatus(
+            int(self._reg_status.value) + DUCO_ZONE_STATUS_OFFSET)
 
     @property
     def zone(self):

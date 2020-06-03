@@ -213,8 +213,8 @@ class ModbusRegister:
     def __str__(self):
         """Return the string representation of the register."""
         self.update()
-        return (" " + self._name + ": " + str(self._value) +
-                " " + self._unit_of_measurement)
+        return (self._name + ": " + str(self._value) + " " +
+                self._unit_of_measurement)
 
     @property
     def value(self):
@@ -226,7 +226,7 @@ class ModbusRegister:
         """Return the state of the register."""
         self.update()
         return {'name': self._name,
-                'value': self._value,
+                'value': str(self._value),
                 'unit': self._unit_of_measurement}
 
     @property
