@@ -2,12 +2,18 @@
 import logging
 
 from duco.const import (
-    PROJECT_PACKAGE_NAME, DUCO_REG_ADDR_INPUT_MODULE_TYPE,
-    DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID)
+    PROJECT_PACKAGE_NAME,
+    DUCO_REG_ADDR_INPUT_MODULE_TYPE,
+    DUCO_MODBUS_MASTER_DEFAULT_UNIT_ID
+)
 
 from duco.enum_types import (ModuleType)
-from duco.modbus import (create_client_config, ModbusHub)
-from duco.nodes import (to_register_addr, Node)
+from duco.helpers import (to_register_addr)
+from duco.modbus import (
+    create_client_config,
+    ModbusHub
+)
+from duco.nodes import (Node)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 

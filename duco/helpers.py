@@ -1,9 +1,10 @@
 """Helper functions."""
 
-from duco.const import (DUCO_PCT_RANGE_START,
-                        DUCO_PCT_RANGE_STEP,
-                        DUCO_PCT_RANGE_STOP,
-                        DUCO_REG_ADDR_NODE_ID_OFFSET)
+from duco.const import (
+    DUCO_PCT_RANGE_START,
+    DUCO_PCT_RANGE_STEP,
+    DUCO_PCT_RANGE_STOP,
+    DUCO_REG_ADDR_NODE_ID_OFFSET)
 
 
 def is_in_pct_range(value):

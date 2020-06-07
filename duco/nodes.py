@@ -1,32 +1,44 @@
 """Duco nodes supported by python-duco."""
-from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
-                        DUCO_REG_ADDR_INPUT_FAN_ACTUAL,
-                        DUCO_REG_ADDR_INPUT_TEMPERATURE,
-                        DUCO_REG_ADDR_INPUT_CO2_ACTUAL,
-                        DUCO_REG_ADDR_INPUT_RH_ACTUAL,
-                        DUCO_REG_ADDR_INPUT_GROUP,
-                        DUCO_REG_ADDR_HOLD_FAN_SETPOINT,
-                        DUCO_REG_ADDR_HOLD_CO2_SETPOINT,
-                        DUCO_REG_ADDR_HOLD_RH_SETPOINT,
-                        DUCO_REG_ADDR_HOLD_RH_DELTA,
-                        DUCO_REG_ADDR_HOLD_FLOW,
-                        DUCO_REG_ADDR_HOLD_AUTOMIN,
-                        DUCO_REG_ADDR_HOLD_AUTOMAX,
-                        DUCO_REG_ADDR_HOLD_ACTION,
-                        DUCO_REG_ADDR_HOLD_BUTTON_1,
-                        DUCO_REG_ADDR_HOLD_BUTTON_2,
-                        DUCO_REG_ADDR_HOLD_BUTTON_3,
-                        DUCO_REG_ADDR_HOLD_MANUAL_TIME,
-                        DUCO_TEMPERATURE_SCALE_FACTOR,
-                        DUCO_TEMPERATURE_PRECISION,
-                        DUCO_RH_SCALE_FACTOR,
-                        DUCO_RH_PRECISION,
-                        DUCO_ZONE_STATUS_OFFSET,
-                        DUCO_ACTION_OFFSET)
-from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
-from duco.helpers import (to_register_addr, verify_in_pct_range)
-from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
-                         DATA_TYPE_INT, ModbusRegister)
+from duco.const import (
+    DUCO_REG_ADDR_INPUT_STATUS,
+    DUCO_REG_ADDR_INPUT_FAN_ACTUAL,
+    DUCO_REG_ADDR_INPUT_TEMPERATURE,
+    DUCO_REG_ADDR_INPUT_CO2_ACTUAL,
+    DUCO_REG_ADDR_INPUT_RH_ACTUAL,
+    DUCO_REG_ADDR_INPUT_GROUP,
+    DUCO_REG_ADDR_HOLD_FAN_SETPOINT,
+    DUCO_REG_ADDR_HOLD_CO2_SETPOINT,
+    DUCO_REG_ADDR_HOLD_RH_SETPOINT,
+    DUCO_REG_ADDR_HOLD_RH_DELTA,
+    DUCO_REG_ADDR_HOLD_FLOW,
+    DUCO_REG_ADDR_HOLD_AUTOMIN,
+    DUCO_REG_ADDR_HOLD_AUTOMAX,
+    DUCO_REG_ADDR_HOLD_ACTION,
+    DUCO_REG_ADDR_HOLD_BUTTON_1,
+    DUCO_REG_ADDR_HOLD_BUTTON_2,
+    DUCO_REG_ADDR_HOLD_BUTTON_3,
+    DUCO_REG_ADDR_HOLD_MANUAL_TIME,
+    DUCO_TEMPERATURE_SCALE_FACTOR,
+    DUCO_TEMPERATURE_PRECISION,
+    DUCO_RH_SCALE_FACTOR,
+    DUCO_RH_PRECISION,
+    DUCO_ZONE_STATUS_OFFSET,
+    DUCO_ACTION_OFFSET
+)
+from duco.enum_types import (
+    ModuleType,
+    ZoneStatus,
+    ZoneAction
+)
+from duco.helpers import (
+    to_register_addr,
+    verify_in_pct_range
+)
+from duco.modbus import (
+    REGISTER_TYPE_INPUT,
+    REGISTER_TYPE_HOLDING,
+    DATA_TYPE_INT, ModbusRegister
+)
 
 
 class Node:

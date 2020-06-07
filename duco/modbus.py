@@ -6,8 +6,11 @@ import threading
 from duco.const import (
     PROJECT_PACKAGE_NAME,
     DUCO_MODBUS_BAUD_RATE,
-    DUCO_MODBUS_BYTE_SIZE, DUCO_MODBUS_STOP_BITS,
-    DUCO_MODBUS_PARITY, DUCO_MODBUS_METHOD)
+    DUCO_MODBUS_BYTE_SIZE,
+    DUCO_MODBUS_STOP_BITS,
+    DUCO_MODBUS_PARITY,
+    DUCO_MODBUS_METHOD
+)
 from duco.helpers import (twos_comp)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
