@@ -24,9 +24,9 @@ from duco.const import (DUCO_REG_ADDR_INPUT_STATUS,
                         DUCO_ZONE_STATUS_OFFSET,
                         DUCO_ACTION_OFFSET)
 from duco.enum_types import (ModuleType, ZoneStatus, ZoneAction)
+from duco.helpers import (to_register_addr, verify_in_pct_range)
 from duco.modbus import (REGISTER_TYPE_INPUT, REGISTER_TYPE_HOLDING,
-                         DATA_TYPE_INT, to_register_addr,
-                         ModbusRegister)
+                         DATA_TYPE_INT, ModbusRegister)
 
 
 class Node:
@@ -101,6 +101,12 @@ class Node:
                 "      " + str(self._reg_setpoint) + "\n" +
                 "      " + str(self._reg_action))
 
+    def state(self):
+        """Return the state of the node."""
+        return (self._reg_action.state, self._reg_status.state,
+                self._reg_zone.state, self._reg_fan_actual.state,
+                self._reg_setpoint.state)
+
     @property
     def node_id(self):
         """Return the id of the node."""
@@ -140,12 +146,6 @@ class Node:
         self._reg_zone.update()
         return self._reg_zone.value
 
-    def state(self):
-        """Return the state of the node."""
-        return (self._reg_action.state, self._reg_status.state,
-                self._reg_zone.state, self._reg_fan_actual.state,
-                self._reg_setpoint.state)
-
 
 class AutoMinMaxCapable:
     """Duco node containing AutoMin and AutoMax registers."""
@@ -169,12 +169,25 @@ class AutoMinMaxCapable:
         return ("      " + str(self._reg_automin) + "\n" +
                 "      " + str(self._reg_automax))
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_automin.state, self._reg_automax.state)
+
     @property
     def auto_min(self):
         """Return the auto min of the node."""
         # synchronous update for now
         self._reg_automin.update()
         return self._reg_automin.value
+
+    @auto_min.setter
+    def auto_min(self, new_min):
+        """Set the auto min of the node to new_min."""
+        new_min_i = int(new_min)
+        # verify that new_min is a valid input
+        verify_in_pct_range(new_min_i)
+        # valid, safe to assign
+        self._reg_automin.value = new_min_i
 
     @property
     def auto_max(self):
@@ -183,9 +196,14 @@ class AutoMinMaxCapable:
         self._reg_automax.update()
         return self._reg_automax.value
 
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (self._reg_automin.state, self._reg_automax.state)
+    @auto_max.setter
+    def auto_max(self, new_max):
+        """Set the auto max of the node to new_max."""
+        new_max_i = int(new_max)
+        # verify that new_max is a valid input
+        verify_in_pct_range(new_max_i)
+        # valid, safe to assign
+        self._reg_automax.value = new_max_i
 
 
 class BoxNode(Node, AutoMinMaxCapable):
@@ -197,15 +215,15 @@ class BoxNode(Node, AutoMinMaxCapable):
         AutoMinMaxCapable.__init__(self, node_id, modbus_hub)
         # no additional registers
 
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (Node.state(self) + "\n" +
-                AutoMinMaxCapable.state(self))
-
     def __str__(self):
         """Return the string representation of the node."""
         return (Node.__str__(self) + "\n" +
                 AutoMinMaxCapable.__str__(self))
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (Node.state(self) + "\n" +
+                AutoMinMaxCapable.state(self))
 
 
 class TemperatureSensor:
@@ -225,16 +243,16 @@ class TemperatureSensor:
         """Return the string representation of the node."""
         return "      " + str(self._reg_temperature)
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_temperature.state,)
+
     @property
     def temperature(self):
         """Return the measured indoor air temperature."""
         # synchronous update for now
         self._reg_temperature.update()
         return self._reg_temperature.value
-
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (self._reg_temperature.state,)
 
 
 class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
@@ -261,17 +279,17 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
                 TemperatureSensor.__str__(self) + "\n" +
                 "      " + str(self._reg_flow))
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (Node.state(self), AutoMinMaxCapable.state(self),
+                TemperatureSensor.state(self), self._reg_flow.state)
+
     @property
     def flow(self):
         """Return the configured valve flow."""
         # synchronous update for now
         self._reg_flow.update()
         return self._reg_flow.value
-
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (Node.state(self), AutoMinMaxCapable.state(self),
-                TemperatureSensor.state(self), self._reg_flow.state)
 
 
 class CO2Sensor:
@@ -299,6 +317,10 @@ class CO2Sensor:
         return ("      " + str(self._reg_co2_value) + "\n" +
                 "      " + str(self._reg_co2_setpoint))
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_co2_setpoint.state, self._reg_co2_value.state)
+
     @property
     def co2_value(self):
         """Return the measured CO2 concentration in ppm."""
@@ -312,10 +334,6 @@ class CO2Sensor:
         # synchronous update for now
         self._reg_co2_setpoint.update()
         return self._reg_co2_setpoint.value
-
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (self._reg_co2_setpoint.state, self._reg_co2_value.state)
 
 
 class RHSensor:
@@ -350,6 +368,11 @@ class RHSensor:
                 "      " + str(self._reg_rh_setpoint) + "\n" +
                 "      " + str(self._reg_rh_delta))
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_rh_setpoint.state, self._reg_rh_value.state,
+                self._reg_rh_delta.state)
+
     @property
     def rh_value(self):
         """Return the measured relative humidity in %."""
@@ -370,11 +393,6 @@ class RHSensor:
         # synchronous update for now
         self._reg_rh_delta.update()
         return bool(self._reg_rh_delta.value)
-
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (self._reg_rh_setpoint.state, self._reg_rh_value.state,
-                self._reg_rh_delta.state)
 
 
 class UserController:
@@ -415,6 +433,11 @@ class UserController:
                 "      " + str(self._reg_button_3) + "\n" +
                 "      " + str(self._reg_manual_time))
 
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return (self._reg_button_1.state, self._reg_button_2.state,
+                self._reg_button_3.state, self._reg_manual_time.state)
+
     @property
     def button1(self):
         """Return the current setpoint behind button 1."""
@@ -443,11 +466,6 @@ class UserController:
         self._reg_manual_time.update()
         return self._reg_manual_time.value
 
-    def state(self):
-        """Return the state of the node as a tuple."""
-        return (self._reg_button_1.state, self._reg_button_2.state,
-                self._reg_button_3.state, self._reg_manual_time.state)
-
 
 class SensorlessValveNode(Valve):
     """Valve base class."""
@@ -459,6 +477,10 @@ class SensorlessValveNode(Valve):
     def __str__(self):
         """Return the string representation of the node."""
         return Valve.__str__(self)
+
+    def state(self):
+        """Return the state of the node as a tuple."""
+        return Valve.state(self)
 
 
 class CO2ValveNode(Valve, CO2Sensor):
@@ -553,5 +575,5 @@ class RHSensorNode(Node, UserController, RHSensor):
 
     def state(self):
         """Return the state of the node as a tuple."""
-        state = Node.state(self) + UserController.state(self)
-        return state + RHSensor.state(self)
+        return (Node.state(self) + UserController.state(self) +
+                RHSensor.state(self))

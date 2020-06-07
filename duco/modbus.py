@@ -8,6 +8,7 @@ from duco.const import (
     DUCO_MODBUS_BAUD_RATE,
     DUCO_MODBUS_BYTE_SIZE, DUCO_MODBUS_STOP_BITS,
     DUCO_MODBUS_PARITY, DUCO_MODBUS_METHOD)
+from duco.helpers import (twos_comp)
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
 
@@ -50,18 +51,6 @@ def create_client_config(modbus_client_type, modbus_client_port,
         raise ValueError("modbus_client_type must be serial or tcp")
 
     return config
-
-
-def to_register_addr(node_id, param_id):
-    """Compute modbus address from node_id and param_id."""
-    return node_id*10 + param_id
-
-
-def twos_comp(val, bits):
-    """Compute the 2's complement of int value val."""
-    if (val & (1 << (bits - 1))) != 0:  # if sign bit is set
-        val = val - (1 << bits)         # compute negative value
-    return val                          # return positive value as is
 
 
 class ModbusHub:
@@ -212,21 +201,28 @@ class ModbusRegister:
 
     def __str__(self):
         """Return the string representation of the register."""
-        self.update()
-        return (self._name + ": " + str(self._value) + " " +
+        return (self._name + ": " + str(self.value) + " " +
                 self._unit_of_measurement)
 
     @property
     def value(self):
         """Return the value of the register."""
+        self.update()
         return self._value
+
+    @value.setter
+    def value(self, new_value):
+        """Set the value of the node to new_value."""
+        if self._register_type != REGISTER_TYPE_HOLDING:
+            raise TypeError("Register must be of type HOLDING")
+
+        self._hub.write_register(self._register, new_value)
 
     @property
     def state(self):
         """Return the state of the register."""
-        self.update()
         return {'name': self._name,
-                'value': str(self._value),
+                'value': str(self.value),
                 'unit': self._unit_of_measurement}
 
     @property
@@ -240,7 +236,7 @@ class ModbusRegister:
         return self._unit_of_measurement
 
     def update(self):
-        """Update the value of the register."""
+        """Update the value of the register from the external hub."""
         if self._register_type == REGISTER_TYPE_INPUT:
             result = self._hub.read_input_registers(
                 self._register,
