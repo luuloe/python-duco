@@ -120,30 +120,22 @@ class Node:
     @property
     def action(self):
         """Return the zone action of the node."""
-        # synchronous update for now
-        self._reg_action.update()
         return ZoneAction(int(self._reg_action.value) + DUCO_ACTION_OFFSET)
 
     @property
     def fan_actual(self):
         """Return the actual fan value of the node."""
-        # synchronous update for now
-        self._reg_fan_actual.update()
         return self._reg_fan_actual.value
 
     @property
     def status(self):
         """Return the zone status of the node."""
-        # synchronous update for now
-        self._reg_status.update()
         return ZoneStatus(
             int(self._reg_status.value) + DUCO_ZONE_STATUS_OFFSET)
 
     @property
     def zone(self):
         """Return the zone to which the node belongs."""
-        # synchronous update for now
-        self._reg_zone.update()
         return self._reg_zone.value
 
 
@@ -176,8 +168,6 @@ class AutoMinMaxCapable:
     @property
     def auto_min(self):
         """Return the auto min of the node."""
-        # synchronous update for now
-        self._reg_automin.update()
         return self._reg_automin.value
 
     @auto_min.setter
@@ -192,8 +182,6 @@ class AutoMinMaxCapable:
     @property
     def auto_max(self):
         """Return the auto max of the node."""
-        # synchronous update for now
-        self._reg_automax.update()
         return self._reg_automax.value
 
     @auto_max.setter
@@ -250,8 +238,6 @@ class TemperatureSensor:
     @property
     def temperature(self):
         """Return the measured indoor air temperature."""
-        # synchronous update for now
-        self._reg_temperature.update()
         return self._reg_temperature.value
 
 
@@ -287,8 +273,6 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
     @property
     def flow(self):
         """Return the configured valve flow."""
-        # synchronous update for now
-        self._reg_flow.update()
         return self._reg_flow.value
 
 
@@ -324,15 +308,11 @@ class CO2Sensor:
     @property
     def co2_value(self):
         """Return the measured CO2 concentration in ppm."""
-        # synchronous update for now
-        self._reg_co2_value.update()
         return self._reg_co2_value.value
 
     @property
     def co2_setpoint(self):
         """Return the desired CO2 concentration in ppm."""
-        # synchronous update for now
-        self._reg_co2_setpoint.update()
         return self._reg_co2_setpoint.value
 
 
@@ -376,22 +356,16 @@ class RHSensor:
     @property
     def rh_value(self):
         """Return the measured relative humidity in %."""
-        # synchronous update for now
-        self._reg_rh_value.update()
         return self._reg_rh_value.value
 
     @property
     def rh_setpoint(self):
         """Return the desired relative humidity in %."""
-        # synchronous update for now
-        self._reg_rh_setpoint.update()
         return self._reg_rh_setpoint.value
 
     @property
     def is_rh_delta_enabled(self):
         """Return whether or not RH delta control is activated."""
-        # synchronous update for now
-        self._reg_rh_delta.update()
         return bool(self._reg_rh_delta.value)
 
 
@@ -441,29 +415,21 @@ class UserController:
     @property
     def button1(self):
         """Return the current setpoint behind button 1."""
-        # synchronous update for now
-        self._reg_button_1.update()
         return self._reg_button_1.value
 
     @property
     def button2(self):
         """Return the current setpoint behind button 2."""
-        # synchronous update for now
-        self._reg_button_2.update()
         return self._reg_button_2.value
 
     @property
     def button3(self):
         """Return the current setpoint behind button 3."""
-        # synchronous update for now
-        self._reg_button_3.update()
         return self._reg_button_3.value
 
     @property
     def manual_time(self):
         """Return the duration of the manual mode."""
-        # synchronous update for now
-        self._reg_manual_time.update()
         return self._reg_manual_time.value
 
 
