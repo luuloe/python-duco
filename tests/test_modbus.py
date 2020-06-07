@@ -7,20 +7,6 @@ from duco.enum_types import (ModuleType)
 import duco.modbus
 
 
-class TestToRegisterAddress(unittest.TestCase):
-    def test_1(self):
-        node_id = 3
-        param_id = 5
-        self.assertEqual(duco.modbus.to_register_addr(node_id, param_id),
-                         (node_id*10+param_id))
-
-    def test_2(self):
-        node_id = 9
-        param_id = 8
-        self.assertEqual(duco.modbus.to_register_addr(node_id, param_id),
-                         (node_id*10+param_id))
-
-
 class TestModbusHub(unittest.TestCase):
     def test_init_1(self):
         client_config = duco.modbus.create_client_config('serial', '/dev/usb0')
@@ -140,13 +126,13 @@ class TestModbusRegister(unittest.TestCase):
         r_data_type = duco.modbus.DATA_TYPE_INT
         r_precision = 4
         reg = duco.modbus.ModbusRegister(r_hub, r_name, r_reg, r_reg_type, r_unit,
-                                       r_count, r_scale, r_offset, r_data_type,
-                                       r_precision)
+                                         r_count, r_scale, r_offset, r_data_type,
+                                         r_precision)
         self.assertEqual(reg.name, r_name, "")
         self.assertEqual(reg.unit_of_measurement, r_unit, "")
-        self.assertEqual(reg.value, None)
         self.assertEqual(reg._count, r_count)
         self.assertEqual(reg._scale, r_scale)
         self.assertEqual(reg._offset, r_offset)
         self.assertEqual(reg._data_type, r_data_type)
         self.assertEqual(reg._precision, r_precision)
+        self.assertEqual(reg._value, None)
