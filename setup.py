@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Python Duco setup script."""
 import os
+from os import path
 from setuptools import setup, find_packages
 from duco.const import (__version__, PROJECT_PACKAGE_NAME,
                         PROJECT_LICENSE, PROJECT_URL,
@@ -18,6 +19,13 @@ REQUIRES = [
     'pymodbus==2.3.0',
 ]
 
+def get_long_description():
+    """Read long description from README.rst."""
+    this_directory = path.abspath(path.dirname(__file__))
+    with open(path.join(this_directory, 'README.rst')) as readme:
+        long_description = readme.read()
+        return long_description
+
 setup(
     name=PROJECT_PACKAGE_NAME,
     version=__version__,
@@ -27,6 +35,8 @@ setup(
     author=PROJECT_AUTHOR,
     author_email=PROJECT_EMAIL,
     description=PROJECT_DESCRIPTION,
+    long_description=get_long_description(),
+    long_description_content_type='text/x-rst',
     packages=PACKAGES,
     include_package_data=True,
     zip_safe=False,
