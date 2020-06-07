@@ -15,7 +15,7 @@ DOWNLOAD_URL = ('{}/archive/'
 PACKAGES = find_packages(exclude=['tests', 'tests.*'])
 
 REQUIRES = [
-    'pymodbus==1.3.2',
+    'pymodbus==2.3.0',
 ]
 
 setup(
