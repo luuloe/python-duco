@@ -1,4 +1,18 @@
 """Test methods in duco/duco.py."""
+import unittest
+import duco
+from duco.const import (
+    MAJOR_VERSION,
+    MINOR_VERSION,
+    PATCH_VERSION
+    )
+
+
+class TestDucoVersion(unittest.TestCase):
+    def test_version(self):
+        self.assertEqual(duco.__version__, "{}.{}.{}"
+                         .format(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION))
+
 
 
 """ class TestProbeNodeId(unittest.TestCase):
