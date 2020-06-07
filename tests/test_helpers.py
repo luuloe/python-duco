@@ -3,20 +3,20 @@ import unittest
 import duco.helpers
 
 
-class TestIsInPctRange(unittest.TestCase):
-    """Class that tests to_register_addr function."""
+class TestVerifyValueInRange(unittest.TestCase):
+    """Class that tests verify_value_in_range function."""
 
-    def test_true(self):
-        self.assertTrue(duco.helpers.is_in_pct_range(0))
-        self.assertTrue(duco.helpers.is_in_pct_range(100))
+    def test_is_none(self):
+        self.assertIsNone(duco.helpers.verify_value_in_range(0, 0, 5, 100))
+        self.assertIsNone(duco.helpers.verify_value_in_range(100, 0, 5, 100))
         for var in range(0, 105, 5):
-            self.assertTrue(duco.helpers.is_in_pct_range(var))
+            self.assertIsNone(duco.helpers.verify_value_in_range(var, 0, 5, 100))
 
-    def test_false(self):
-        self.assertFalse(duco.helpers.is_in_pct_range(-1))
-        self.assertFalse(duco.helpers.is_in_pct_range(1))
-        self.assertFalse(duco.helpers.is_in_pct_range(99))
-        self.assertFalse(duco.helpers.is_in_pct_range(101))
+    def test_raises(self):
+        self.assertRaises(ValueError, lambda: duco.helpers.verify_value_in_range(-1, 0, 5, 100))
+        self.assertRaises(ValueError, lambda: duco.helpers.verify_value_in_range(1, 0, 5, 100))
+        self.assertRaises(ValueError, lambda: duco.helpers.verify_value_in_range(99, 0, 5, 100))
+        self.assertRaises(ValueError, lambda: duco.helpers.verify_value_in_range(101, 0, 5, 100))
 
 class TestToRegisterAddress(unittest.TestCase):
     """Class that tests to_register_addr function."""

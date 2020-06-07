@@ -1,26 +1,19 @@
 """Helper functions."""
 
 from duco.const import (
-    DUCO_PCT_RANGE_START,
-    DUCO_PCT_RANGE_STEP,
-    DUCO_PCT_RANGE_STOP,
-    DUCO_REG_ADDR_NODE_ID_OFFSET)
+    DUCO_REG_ADDR_NODE_ID_OFFSET
+)
 
 
-def is_in_pct_range(value):
-    """Return whether value is in duco percentage range."""
-    return value in range(DUCO_PCT_RANGE_START,
-                          DUCO_PCT_RANGE_STOP+DUCO_PCT_RANGE_STEP,
-                          DUCO_PCT_RANGE_STEP)
-
-
-def verify_in_pct_range(value):
-    """Verify that value is in duco percentage range."""
-    if not is_in_pct_range(value):
+def verify_value_in_range(value, range_start, range_step, range_stop):
+    """Verify that value is in range _start,_step,_stop."""
+    if value not in range(range_start,
+                          range_stop+range_step,
+                          range_step):
         raise ValueError("Value must be within {} and {} with steps of {}"
-                         .format(DUCO_PCT_RANGE_START,
-                                 DUCO_PCT_RANGE_STOP,
-                                 DUCO_PCT_RANGE_STEP))
+                         .format(range_start,
+                                 range_stop,
+                                 range_step))
 
 
 def to_register_addr(node_id, param_id):

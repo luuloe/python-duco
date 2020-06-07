@@ -23,7 +23,10 @@ from duco.const import (
     DUCO_RH_SCALE_FACTOR,
     DUCO_RH_PRECISION,
     DUCO_ZONE_STATUS_OFFSET,
-    DUCO_ACTION_OFFSET
+    DUCO_ACTION_OFFSET,
+    DUCO_PCT_RANGE_START,
+    DUCO_PCT_RANGE_STEP,
+    DUCO_PCT_RANGE_STOP
 )
 from duco.enum_types import (
     ModuleType,
@@ -32,7 +35,7 @@ from duco.enum_types import (
 )
 from duco.helpers import (
     to_register_addr,
-    verify_in_pct_range
+    verify_value_in_range
 )
 from duco.modbus import (
     REGISTER_TYPE_INPUT,
@@ -110,14 +113,12 @@ class Node:
                 "      " + str(self._reg_zone) + "\n" +
                 "      " + str(self.status) + "\n" +
                 "      " + str(self._reg_fan_actual) + "\n" +
-                "      " + str(self._reg_setpoint) + "\n" +
-                "      " + str(self._reg_action))
+                "      " + str(self._reg_setpoint))
 
     def state(self):
         """Return the state of the node."""
-        return (self._reg_action.state, self._reg_status.state,
-                self._reg_zone.state, self._reg_fan_actual.state,
-                self._reg_setpoint.state)
+        return (self._reg_status.state, self._reg_zone.state,
+                self._reg_fan_actual.state, self._reg_setpoint.state)
 
     @property
     def node_id(self):
@@ -131,8 +132,26 @@ class Node:
 
     @property
     def action(self):
-        """Return the zone action of the node."""
-        return ZoneAction(int(self._reg_action.value) + DUCO_ACTION_OFFSET)
+        """Return the action of the node
+
+        Returns always None. Action has no getter/property as
+        it seems to be write only (not in Duco documentation)
+        Reading the register always returns -1
+        """
+        return None
+
+    @action.setter
+    def action(self, new_action):
+        """Set node.action to new_action."""
+        # verify that new_action is a valid input
+        new_action_i = int(new_action)
+        # if a ZoneAction enum was passed, we need to correct the int value
+        if isinstance(new_action, ZoneAction):
+            new_action_i = new_action_i - DUCO_ACTION_OFFSET
+        # verify that converted value is in int range
+        verify_value_in_range(new_action_i, 0, 1, 6)
+        # valid, safe to assign
+        self._reg_action.value = new_action_i
 
     @property
     def fan_actual(self):
@@ -185,9 +204,10 @@ class AutoMinMaxCapable:
     @auto_min.setter
     def auto_min(self, new_min):
         """Set the auto min of the node to new_min."""
-        new_min_i = int(new_min)
         # verify that new_min is a valid input
-        verify_in_pct_range(new_min_i)
+        new_min_i = int(new_min)
+        verify_value_in_range(new_min_i, DUCO_PCT_RANGE_START,
+                              DUCO_PCT_RANGE_STEP, DUCO_PCT_RANGE_STOP)
         # valid, safe to assign
         self._reg_automin.value = new_min_i
 
@@ -199,9 +219,10 @@ class AutoMinMaxCapable:
     @auto_max.setter
     def auto_max(self, new_max):
         """Set the auto max of the node to new_max."""
-        new_max_i = int(new_max)
         # verify that new_max is a valid input
-        verify_in_pct_range(new_max_i)
+        new_max_i = int(new_max)
+        verify_value_in_range(new_max_i, DUCO_PCT_RANGE_START,
+                              DUCO_PCT_RANGE_STEP, DUCO_PCT_RANGE_STOP)
         # valid, safe to assign
         self._reg_automax.value = new_max_i
 
@@ -429,15 +450,45 @@ class UserController:
         """Return the current setpoint behind button 1."""
         return self._reg_button_1.value
 
+    @button1.setter
+    def button1(self, new_setpoint):
+        """Set the setpoint of button 1."""
+        # verify that new_setpoint is a valid input
+        new_setpoint_i = int(new_setpoint)
+        verify_value_in_range(new_setpoint_i, DUCO_PCT_RANGE_START,
+                              DUCO_PCT_RANGE_STEP, DUCO_PCT_RANGE_STOP)
+        # valid, safe to assign
+        self._reg_button_1.value = new_setpoint_i
+
     @property
     def button2(self):
         """Return the current setpoint behind button 2."""
         return self._reg_button_2.value
 
+    @button2.setter
+    def button2(self, new_setpoint):
+        """Set the setpoint of button 2."""
+        # verify that new_setpoint is a valid input
+        new_setpoint_i = int(new_setpoint)
+        verify_value_in_range(new_setpoint_i, DUCO_PCT_RANGE_START,
+                              DUCO_PCT_RANGE_STEP, DUCO_PCT_RANGE_STOP)
+        # valid, safe to assign
+        self._reg_button_2.value = new_setpoint_i
+
     @property
     def button3(self):
         """Return the current setpoint behind button 3."""
         return self._reg_button_3.value
+
+    @button3.setter
+    def button3(self, new_setpoint):
+        """Set the setpoint of button 3."""
+        # verify that new_setpoint is a valid input
+        new_setpoint_i = int(new_setpoint)
+        verify_value_in_range(new_setpoint_i, DUCO_PCT_RANGE_START,
+                              DUCO_PCT_RANGE_STEP, DUCO_PCT_RANGE_STOP)
+        # valid, safe to assign
+        self._reg_button_3.value = new_setpoint_i
 
     @property
     def manual_time(self):

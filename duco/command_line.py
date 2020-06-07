@@ -3,7 +3,7 @@
 import logging
 import argparse
 from duco.const import (PROJECT_PACKAGE_NAME)
-from duco.enum_types import (ModuleType)
+from duco.enum_types import (ModuleType, ZoneAction)
 from duco.duco import (DucoBox)
 
 
@@ -57,16 +57,9 @@ def main():
     with DucoBox(args.modbus_type, args.modbus_port,
                  args.modbus_host) as duco_box:
         for node in duco_box.node_list:
-            if node.node_type == ModuleType.MASTER:
-                print(node)
-                node.auto_max = 50
-                print(node)
-            if (
-                    node.node_type == ModuleType.VALVE_CO2 or
-                    node.node_type == ModuleType.VALVE_RH):
-                print(node)
-                node.auto_min = 10
-                node.auto_max = 100
+            print(node)
+            if node.node_type == ModuleType.USER_CONTROLLER:
+                node.action = ZoneAction.ZONE_TO_AUTO
                 print(node)
 
 
