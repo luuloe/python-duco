@@ -32,3 +32,26 @@ class TestToRegisterAddress(unittest.TestCase):
         param_id = 8
         self.assertEqual(duco.helpers.to_register_addr(node_id, param_id),
                          (node_id*10+param_id))
+
+class TestTwosComp(unittest.TestCase):
+    """Class that tests twos_comp function."""
+
+    def test_8b(self):
+        """Test multiple stimuli."""
+        n_bits = 8
+        # positive
+        for var in range(0, 2**(n_bits-1), 1):
+            self.assertEqual(duco.helpers.twos_comp(var, n_bits), var)
+        # negative
+        for var in range(1, 2**(n_bits-1), 1):
+            self.assertEqual(duco.helpers.twos_comp((2**n_bits)-var, n_bits), -var)
+
+    def test_16b(self):
+        """Test multiple stimuli."""
+        n_bits = 16
+        # positive
+        for var in range(0, 2**(n_bits-1), 1):
+            self.assertEqual(duco.helpers.twos_comp(var, n_bits), var)
+        # negative
+        for var in range(1, 2**(n_bits-1), 1):
+            self.assertEqual(duco.helpers.twos_comp((2**n_bits)-var, n_bits), -var)
