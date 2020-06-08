@@ -18,6 +18,8 @@ matrix:
 cache:
   directories:
     - $HOME/.cache/pip
-install: pip install tox
+install: pip install tox coveralls
 language: python
 script: travis_wait tox
+after_success:
+  - coveralls

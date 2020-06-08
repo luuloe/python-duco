@@ -2,7 +2,6 @@
 # make new things fail. Manually update these pins when pulling in a
 # new version
 flake8==3.8.1
-pydocstyle==5.0.2
 pylint==2.5.2
 astroid==2.4.1
 mypy==0.770

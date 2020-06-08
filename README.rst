@@ -36,10 +36,9 @@ You can import the module as `duco`.
 
     import duco
     
-    with DucoSystem(args.modbus_type, args.modbus_port) as dapi:
-        for node in dapi.node_list:
-            print(node.node_type)
-            print(node.state())
+    with DucoBox(args.modbus_type, args.modbus_port) as duco_box:
+        for node in duco_box.node_list:
+            print(node)
 
 Contributing
 =====
@@ -58,9 +57,6 @@ Released under the MIT License.
 .. |Doc Status| image:: https://readthedocs.org/projects/python-duco/badge/?version=latest
    :target: http://python-duco.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-.. |Coverity Status| image:: https://scan.coverity.com/projects/14019/badge.svg
-   :target: https://scan.coverity.com/projects/luuloe-mbusd
-   :alt: Coverity Scan Build Status
 .. |Codacy Status| image:: https://api.codacy.com/project/badge/Grade/629d143e73c842d69b994efa4e259e77
    :target: https://www.codacy.com/app/luuloe/python-duco?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=luuloe/python-duco&amp;utm_campaign=Badge_Grade
    :alt: Codacy Status
