@@ -132,7 +132,7 @@ class Node:
 
     @property
     def action(self):
-        """Return the action of the node
+        """Return the action of the node.
 
         Returns always None. Action has no getter/property as
         it seems to be write only (not in Duco documentation)
