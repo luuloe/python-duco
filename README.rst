@@ -1,5 +1,5 @@
-python-duco |Build Status| |Coverage Status| |Doc Status| |Codacy Status| |Coverity Status|
-=============================================================
+python-duco |Build Status| |Coverage Status| |Doc Status| |Codacy Status|
+=========================================================================
 Python API and command line tool for communicating to the Duco™ Ventilation System. 
 
 The Duco™ Ventilation System supports the option for an external unit to communicate via the ModBus interface. A Duco™ 'master' with ModBus interface (e.g. DucoBox Focus or IQ-unit) exposes all information of the Duco-network and allows external units to control the Duco-network and change settings over ModBus.
