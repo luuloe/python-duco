@@ -65,7 +65,8 @@ class Node:
             return CO2SensorNode(node_id, node_type, modbus_hub)
         if node_type == ModuleType.ROOM_SENSOR_RH:
             return RHSensorNode(node_id, node_type, modbus_hub)
-        assert 0, "ModuleType not implemented: " + ModuleType(node_type)
+        raise ValueError("ModuleType not implemented: {}"
+                         .format(ModuleType(node_type)))
 
     def __init__(self, node_id, node_type, modbus_hub):
         """Initialize Node base."""

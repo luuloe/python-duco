@@ -119,7 +119,8 @@ class ModbusHub:
                 timeout=self._config_timeout,
             )
         else:
-            assert False
+            raise ValueError(("Unsupported config_type, must be serial, " +
+                              "tcp, udp, rtuovertcp"))
 
         # Connect device
         self.connect()
