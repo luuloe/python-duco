@@ -7,6 +7,22 @@ from duco.enum_types import (ModuleType)
 import duco.modbus
 
 
+class TestCreateClientConfig(unittest.TestCase):
+    def test_serial(self):
+        client_config = duco.modbus.create_client_config('serial', '/dev/usb0')
+        self.assertEqual(client_config[duco.modbus.CONF_TYPE], 'serial')
+        self.assertEqual(client_config[duco.modbus.CONF_PORT], '/dev/usb0')
+
+    def test_tcp(self):
+        client_config = duco.modbus.create_client_config('tcp', 502)
+        self.assertEqual(client_config[duco.modbus.CONF_TYPE], 'tcp')
+        self.assertEqual(client_config[duco.modbus.CONF_PORT], '502')
+
+    def test_invalid_client_type(self):
+        self.assertRaises(ValueError, lambda: duco.modbus.create_client_config('foo', '/dev/usb0'))
+        self.assertRaises(ValueError, lambda: duco.modbus.create_client_config('bar', '/dev/usb0'))
+
+
 class TestModbusHub(unittest.TestCase):
     def test_init_1(self):
         client_config = duco.modbus.create_client_config('serial', '/dev/usb0')
