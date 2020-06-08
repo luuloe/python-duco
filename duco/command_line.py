@@ -3,7 +3,8 @@
 import logging
 import argparse
 from duco.const import (PROJECT_PACKAGE_NAME)
-from duco.duco import (DucoSystem)
+from duco.enum_types import (ModuleType, ZoneAction)
+from duco.duco import (DucoBox)
 
 
 _LOGGER = logging.getLogger(PROJECT_PACKAGE_NAME)
@@ -40,7 +41,7 @@ def parse_args():
     parser.add_argument('--port', dest='modbus_port',
                         help='modbus client port ')
 
-    parser.add_argument('--host', dest='modbus_tcp_host',
+    parser.add_argument('--host', dest='modbus_host',
                         default='localhost',
                         help='optional, modbus tcp host')
 
@@ -53,10 +54,13 @@ def main():
 
     configure_logging()
 
-    with DucoSystem(args.modbus_type, args.modbus_port) as duco_sys:
-        for node in duco_sys.node_list:
-            print(node.node_type)
-            print(node.state())
+    with DucoBox(args.modbus_type, args.modbus_port,
+                 args.modbus_host) as duco_box:
+        for node in duco_box.node_list:
+            print(node)
+            if node.node_type == ModuleType.USER_CONTROLLER:
+                node.action = ZoneAction.ZONE_TO_AUTO
+                print(node)
 
 
 if __name__ == '__main__':

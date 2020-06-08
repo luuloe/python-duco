@@ -1,19 +1,19 @@
 # coding: utf-8
 """Constants used by duco."""
 MAJOR_VERSION = 0
-MINOR_VERSION = 1
+MINOR_VERSION = 2
 PATCH_VERSION = '0'
 __short_version__ = '{}.{}'.format(MAJOR_VERSION, MINOR_VERSION)
 __version__ = '{}.{}'.format(__short_version__, PATCH_VERSION)
-REQUIRED_PYTHON_VER = (3, 4, 2)
-REQUIRED_PYTHON_VER_WIN = (3, 4, 2)
+REQUIRED_PYTHON_VER = (3, 6, 7)
+REQUIRED_PYTHON_VER_WIN = (3, 6, 7)
 CONSTRAINT_FILE = 'package_constraints.txt'
 
 PROJECT_NAME = 'Python Duco'
 PROJECT_PACKAGE_NAME = 'python-duco'
 PROJECT_LICENSE = 'MIT License'
 PROJECT_AUTHOR = 'Luuk Loeffen'
-PROJECT_COPYRIGHT = ' 2017, {}'.format(PROJECT_AUTHOR)
+PROJECT_COPYRIGHT = ' 2020, {}'.format(PROJECT_AUTHOR)
 PROJECT_EMAIL = 'luukloeffen@hotmail.com'
 PROJECT_DESCRIPTION = ('Open-source Python 3 library that allows '
                        'communication to the Duco Ventilation System.')
@@ -24,7 +24,7 @@ PROJECT_CLASSIFIERS = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
-    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Home Automation',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
@@ -74,6 +74,8 @@ DUCO_ZONE_STATUS_AWAY = 7+DUCO_ZONE_STATUS_OFFSET
 DUCO_ZONE_STATUS_ERROR = 99+DUCO_ZONE_STATUS_OFFSET
 
 # addressing
+DUCO_REG_ADDR_NODE_ID_OFFSET = 10
+
 DUCO_REG_ADDR_INPUT_MODULE_TYPE = 0
 DUCO_REG_ADDR_INPUT_STATUS = 1
 DUCO_REG_ADDR_INPUT_FAN_ACTUAL = 2
@@ -139,3 +141,8 @@ DUCO_ACTION_ZONE_TO_MANUAL_2 = 3+DUCO_ACTION_OFFSET
 DUCO_ACTION_ZONE_TO_MANUAL_3 = 4+DUCO_ACTION_OFFSET
 DUCO_ACTION_ZONE_TO_AUTO = 5+DUCO_ACTION_OFFSET
 DUCO_ACTION_AWAY = 6+DUCO_ACTION_OFFSET
+
+# multiple registers have a valid range for percentages of _START,_STEP,_STOP
+DUCO_PCT_RANGE_START = 0
+DUCO_PCT_RANGE_STEP = 5
+DUCO_PCT_RANGE_STOP = 100

@@ -1,4 +1,5 @@
+pydocstyle==5.0.2
 Sphinx==1.6.4
 sphinx-autodoc-typehints==1.2.3
 sphinx-autodoc-annotation==1.0.post1
-pymodbus==1.3.2
+pymodbus==2.3.0
