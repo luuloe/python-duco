@@ -1,6 +1,5 @@
 """Support for Modbus."""
 import logging
-import struct
 import threading
 
 from duco.const import (
@@ -29,9 +28,6 @@ CONF_TIMEOUT = 'timeout'
 
 REGISTER_TYPE_HOLDING = 'holding'
 REGISTER_TYPE_INPUT = 'input'
-
-DATA_TYPE_INT = 'int'
-DATA_TYPE_FLOAT = 'float'
 
 
 def create_client_config(modbus_client_type, modbus_client_port,
@@ -187,20 +183,18 @@ class ModbusHub:
 class ModbusRegister:
     """Modbus register."""
 
-    def __init__(self, hub, name, register, register_type,
-                 unit_of_measurement, count, scale, offset, data_type,
-                 precision):
+    def __init__(self, hub, name, register_addr, register_type,
+                 unit_of_measurement='', scale=1, offset=0, precision=0):
         """Initialize the modbus register."""
         self._hub = hub
         self._name = name
-        self._register = int(register)
+        self._register_addr = int(register_addr)
         self._register_type = register_type
         self._unit_of_measurement = unit_of_measurement
-        self._count = int(count)
         self._scale = scale
         self._offset = offset
         self._precision = precision
-        self._data_type = data_type
+        self._count = 1
         self._value = None
 
     def __str__(self):
@@ -211,7 +205,7 @@ class ModbusRegister:
     @property
     def value(self):
         """Return the value of the register."""
-        self.update()
+        self.__update()
         return self._value
 
     @value.setter
@@ -220,7 +214,7 @@ class ModbusRegister:
         if self._register_type != REGISTER_TYPE_HOLDING:
             raise TypeError("Register must be of type HOLDING")
 
-        self._hub.write_register(self._register, new_value)
+        self._hub.write_register(self._register_addr, new_value)
 
     @property
     def state(self):
@@ -239,15 +233,15 @@ class ModbusRegister:
         """Return the unit of measurement."""
         return self._unit_of_measurement
 
-    def update(self):
+    def __update(self):
         """Update the value of the register from the external hub."""
         if self._register_type == REGISTER_TYPE_INPUT:
             result = self._hub.read_input_registers(
-                self._register,
+                self._register_addr,
                 self._count)
         else:
             result = self._hub.read_holding_registers(
-                self._register,
+                self._register_addr,
                 self._count)
         val = 0
 
@@ -255,15 +249,10 @@ class ModbusRegister:
             registers = result.registers
         except AttributeError:
             _LOGGER.error("No response from modbus register %s",
-                          self._register)
+                          self._register_addr)
             return
-        if self._data_type == DATA_TYPE_FLOAT:
-            byte_string = b''.join(
-                [x.to_bytes(2, byteorder='big') for x in registers]
-            )
-            val = struct.unpack(">f", byte_string)[0]
-        elif self._data_type == DATA_TYPE_INT:
-            for _, res in enumerate(registers):
-                val += twos_comp(res, 16)
+        # duco uses twos complement, so convert
+        val = twos_comp(registers[0], 16)
+        # use register specification to correct to actual value
         self._value = format(
             self._scale * val + self._offset, '.{}f'.format(self._precision))

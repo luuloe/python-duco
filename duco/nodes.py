@@ -40,7 +40,7 @@ from duco.helpers import (
 from duco.modbus import (
     REGISTER_TYPE_INPUT,
     REGISTER_TYPE_HOLDING,
-    DATA_TYPE_INT, ModbusRegister
+    ModbusRegister
 )
 
 
@@ -81,31 +81,31 @@ class Node:
             modbus_hub,
             'Zone status',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_STATUS),
-            REGISTER_TYPE_INPUT, '', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT)
 
         self._reg_fan_actual = ModbusRegister(
             modbus_hub,
             'Fan actual',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_FAN_ACTUAL),
-            REGISTER_TYPE_INPUT, '%', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT, '%')
 
         self._reg_zone = ModbusRegister(
             modbus_hub,
             'Zone',
             to_register_addr(self._node_id, DUCO_REG_ADDR_INPUT_GROUP),
-            REGISTER_TYPE_INPUT, '', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT)
         # holding
         self._reg_setpoint = ModbusRegister(
             modbus_hub,
             'Zone setpoint',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_FAN_SETPOINT),
-            REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
 
         self._reg_action = ModbusRegister(
             modbus_hub,
             'Zone action',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_ACTION),
-            REGISTER_TYPE_HOLDING, '', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING)
 
     def __str__(self):
         """Return the string representation of the node."""
@@ -180,13 +180,13 @@ class AutoMinMaxCapable:
             modbus_hub,
             'AutoMin',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_AUTOMIN),
-            REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
 
         self._reg_automax = ModbusRegister(
             modbus_hub,
             'AutoMax',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_AUTOMAX),
-            REGISTER_TYPE_HOLDING, '%', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
 
     def __str__(self):
         """Return the string representation of the node."""
@@ -258,8 +258,8 @@ class TemperatureSensor:
             modbus_hub,
             'Temperature',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_TEMPERATURE),
-            REGISTER_TYPE_INPUT, '°C', 1, DUCO_TEMPERATURE_SCALE_FACTOR,
-            0, DATA_TYPE_INT, DUCO_TEMPERATURE_PRECISION)
+            REGISTER_TYPE_INPUT, '°C',
+            DUCO_TEMPERATURE_SCALE_FACTOR, 0, DUCO_TEMPERATURE_PRECISION)
 
     def __str__(self):
         """Return the string representation of the node."""
@@ -289,7 +289,7 @@ class Valve(Node, AutoMinMaxCapable, TemperatureSensor):
             modbus_hub,
             'Flow',
             to_register_addr(self._node_id, DUCO_REG_ADDR_HOLD_FLOW),
-            REGISTER_TYPE_HOLDING, 'm3/h', 1, 1, 0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, 'm3/h')
         # holding
 
     def __str__(self):
@@ -320,15 +320,13 @@ class CO2Sensor:
             modbus_hub,
             'CO2 value',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_CO2_ACTUAL),
-            REGISTER_TYPE_INPUT, 'ppm', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_INPUT, 'ppm')
         # holding
         self._reg_co2_setpoint = ModbusRegister(
             modbus_hub,
             'CO2 setpoint',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_CO2_SETPOINT),
-            REGISTER_TYPE_HOLDING, 'ppm', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, 'ppm')
 
     def __str__(self):
         """Return the string representation of the node."""
@@ -360,21 +358,19 @@ class RHSensor:
             modbus_hub,
             'RH value',
             to_register_addr(node_id, DUCO_REG_ADDR_INPUT_RH_ACTUAL),
-            REGISTER_TYPE_INPUT, '%', 1, DUCO_RH_SCALE_FACTOR,
-            0, DATA_TYPE_INT, DUCO_RH_PRECISION)
+            REGISTER_TYPE_INPUT, '%',
+            DUCO_RH_SCALE_FACTOR, 0, DUCO_RH_PRECISION)
         # holding
         self._reg_rh_setpoint = ModbusRegister(
             modbus_hub,
             'RH setpoint',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_RH_SETPOINT),
-            REGISTER_TYPE_HOLDING, '%', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
         self._reg_rh_delta = ModbusRegister(
             modbus_hub,
             'RH delta',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_RH_DELTA),
-            REGISTER_TYPE_HOLDING, '-', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING)
 
     def __str__(self):
         """Return the string representation of the node."""
@@ -413,26 +409,22 @@ class UserController:
             modbus_hub,
             'Button 1',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_1),
-            REGISTER_TYPE_HOLDING, '%', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
         self._reg_button_2 = ModbusRegister(
             modbus_hub,
             'Button 2',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_2),
-            REGISTER_TYPE_HOLDING, '%', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
         self._reg_button_3 = ModbusRegister(
             modbus_hub,
             'Button 3',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_BUTTON_3),
-            REGISTER_TYPE_HOLDING, '%', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, '%')
         self._reg_manual_time = ModbusRegister(
             modbus_hub,
             'Manual time',
             to_register_addr(node_id, DUCO_REG_ADDR_HOLD_MANUAL_TIME),
-            REGISTER_TYPE_HOLDING, 'minutes', 1, 1,
-            0, DATA_TYPE_INT, 0)
+            REGISTER_TYPE_HOLDING, 'minutes')
 
     def __str__(self):
         """Return the string representation of the node."""

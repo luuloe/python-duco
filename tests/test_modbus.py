@@ -1,7 +1,7 @@
 """Test methods in duco/modbus.py."""
 import unittest
 # from unittest.mock import Mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock, PropertyMock
 from duco.const import (DUCO_MODULE_TYPE_MASTER)
 from duco.enum_types import (ModuleType)
 import duco.modbus
@@ -130,25 +130,125 @@ class TestModbusHub(unittest.TestCase):
 
 
 class TestModbusRegister(unittest.TestCase):
-    def test_init(self):
+    def test_init_minimal(self):
         r_hub = MagicMock()
-        r_name = 'Zone'
-        r_reg = 10
+        r_name = 'MyName'
+        r_reg_addr = 10
         r_reg_type = duco.modbus.REGISTER_TYPE_INPUT
-        r_unit = ''
-        r_count = 1
+        reg = duco.modbus.ModbusRegister(r_hub, r_name, r_reg_addr,
+                                         r_reg_type)
+        self.assertEqual(reg._name, r_name, "")
+        self.assertEqual(reg._register_addr, r_reg_addr)
+        self.assertEqual(reg._register_type, r_reg_type)
+        self.assertEqual(reg._unit_of_measurement, "", "")
+        self.assertEqual(reg._scale, 1)
+        self.assertEqual(reg._offset, 0)
+        self.assertEqual(reg._precision, 0)
+        self.assertEqual(reg._count, 1)
+        self.assertEqual(reg._value, None)
+
+    def test_init_full(self):
+        r_hub = MagicMock()
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_HOLDING
+        r_unit = 'ppm'
         r_scale = 2
         r_offset = 3
-        r_data_type = duco.modbus.DATA_TYPE_INT
         r_precision = 4
-        reg = duco.modbus.ModbusRegister(r_hub, r_name, r_reg, r_reg_type, r_unit,
-                                         r_count, r_scale, r_offset, r_data_type,
-                                         r_precision)
-        self.assertEqual(reg.name, r_name, "")
-        self.assertEqual(reg.unit_of_measurement, r_unit, "")
-        self.assertEqual(reg._count, r_count)
+        reg = duco.modbus.ModbusRegister(r_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        self.assertEqual(reg._name, r_name, "")
+        self.assertEqual(reg._register_addr, r_reg_addr)
+        self.assertEqual(reg._register_type, r_reg_type)
+        self.assertEqual(reg._unit_of_measurement, r_unit, "")
         self.assertEqual(reg._scale, r_scale)
         self.assertEqual(reg._offset, r_offset)
-        self.assertEqual(reg._data_type, r_data_type)
         self.assertEqual(reg._precision, r_precision)
+        self.assertEqual(reg._count, 1)
         self.assertEqual(reg._value, None)
+
+    def test_value_holding_1(self):
+        mock_result = MagicMock(spec=['registers'])
+        registers = PropertyMock(return_value=[216])
+        type(mock_result).registers = registers
+        mock_hub = MagicMock(spec=['read_holding_registers'])
+        mock_hub.read_holding_registers.return_value = mock_result
+
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_HOLDING
+        r_unit = 'ppm'
+        r_scale = 0.1
+        r_offset = 0
+        r_precision = 1
+        reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        value = reg.value
+        mock_hub.read_holding_registers.assert_called_once_with(r_reg_addr, 1)
+        self.assertEqual(value, "21.6")
+
+    def test_value_holding_2(self):
+        mock_result = MagicMock(spec=['registers'])
+        registers = PropertyMock(return_value=[3754])
+        type(mock_result).registers = registers
+        mock_hub = MagicMock(spec=['read_holding_registers'])
+        mock_hub.read_holding_registers.return_value = mock_result
+
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_HOLDING
+        r_unit = 'ppm'
+        r_scale = 0.01
+        r_offset = 0
+        r_precision = 2
+        reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        value = reg.value
+        mock_hub.read_holding_registers.assert_called_once_with(r_reg_addr, 1)
+        self.assertEqual(value, "37.54")
+
+    def test_value_input_1(self):
+        mock_result = MagicMock(spec=['registers'])
+        registers = PropertyMock(return_value=[216])
+        type(mock_result).registers = registers
+        mock_hub = MagicMock(spec=['read_input_registers'])
+        mock_hub.read_input_registers.return_value = mock_result
+
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_INPUT
+        r_unit = 'ppm'
+        r_scale = 0.1
+        r_offset = 0
+        r_precision = 1
+        reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        value = reg.value
+        mock_hub.read_input_registers.assert_called_once_with(r_reg_addr, 1)
+        self.assertEqual(value, "21.6")
+
+    def test_value_input_2(self):
+        mock_result = MagicMock(spec=['registers'])
+        registers = PropertyMock(return_value=[3754])
+        type(mock_result).registers = registers
+        mock_hub = MagicMock(spec=['read_input_registers'])
+        mock_hub.read_input_registers.return_value = mock_result
+
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_INPUT
+        r_unit = 'ppm'
+        r_scale = 0.01
+        r_offset = 0
+        r_precision = 2
+        reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        value = reg.value
+        mock_hub.read_input_registers.assert_called_once_with(r_reg_addr, 1)
+        self.assertEqual(value, "37.54")
