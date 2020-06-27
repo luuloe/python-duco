@@ -188,13 +188,15 @@ class TestModbusRegister(unittest.TestCase):
                                          r_scale, r_offset, r_precision)
         value = reg.value
         state = reg.state
+        str_reg = str(reg)
         mock_hub.read_holding_registers.assert_called_with(r_reg_addr, 1)
-        self.assertEqual(mock_hub.read_holding_registers.call_count, 2)
+        self.assertEqual(mock_hub.read_holding_registers.call_count, 3)
 
         self.assertEqual(value, "21.6")
         self.assertEqual(state['value'], "21.6")
         self.assertEqual(state['name'], r_name)
         self.assertEqual(state['unit'], r_unit)
+        self.assertEqual(str_reg, r_name+ ': '+ str(value)+' '+r_unit)
 
     def test_get_value_holding_2(self):
         mock_result = MagicMock(spec=['registers'])
@@ -258,6 +260,25 @@ class TestModbusRegister(unittest.TestCase):
         value = reg.value
         mock_hub.read_input_registers.assert_called_once_with(r_reg_addr, 1)
         self.assertEqual(value, "37.54")
+
+    def test_get_value_raises(self):
+        mock_result = MagicMock(spec=[])
+        mock_hub = MagicMock(spec=['read_input_registers'])
+        mock_hub.read_input_registers.return_value = mock_result
+
+        r_name = 'SomeName'
+        r_reg_addr = 3
+        r_reg_type = duco.modbus.REGISTER_TYPE_INPUT
+        r_unit = 'ppm'
+        r_scale = 0.01
+        r_offset = 0
+        r_precision = 2
+        reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
+                                         r_reg_type, r_unit,
+                                         r_scale, r_offset, r_precision)
+        value = reg.value
+        mock_hub.read_input_registers.assert_called_once_with(r_reg_addr, 1)
+        self.assertEqual(value, None)
 
     def test_set_value_holding(self):
         mock_hub = MagicMock(spec=['write_register'])
