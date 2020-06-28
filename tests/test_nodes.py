@@ -19,6 +19,30 @@ import duco.nodes
 
 
 class TestNode(unittest.TestCase):
+    def test_factory(self):
+        node_id = 23
+        hub = MagicMock(spec=['read_holding_registers', 'read_input_registers', 'write_register'])
+
+        type_dict = {ModuleType.MASTER: duco.nodes.BoxNode(node_id, ModuleType.MASTER, hub),
+                     ModuleType.VALVE_SENSORLESS: duco.nodes.SensorlessValveNode(node_id, ModuleType.VALVE_SENSORLESS, hub),
+                     ModuleType.VALVE_CO2: duco.nodes.CO2ValveNode(node_id, ModuleType.VALVE_CO2, hub),
+                     ModuleType.VALVE_RH: duco.nodes.RHValveNode(node_id, ModuleType.VALVE_RH, hub),
+                     ModuleType.USER_CONTROLLER: duco.nodes.UserControllerNode(node_id, ModuleType.USER_CONTROLLER, hub),
+                     ModuleType.ROOM_SENSOR_CO2: duco.nodes.CO2SensorNode(node_id, ModuleType.ROOM_SENSOR_CO2, hub),
+                     ModuleType.ROOM_SENSOR_RH: duco.nodes.RHSensorNode(node_id, ModuleType.ROOM_SENSOR_RH, hub)}
+
+        # non-happy flow
+        with self.assertRaises(ValueError): duco.nodes.Node.factory(node_id, 21, hub)
+        hub.assert_not_called()
+
+        #for module_type in ModuleType: ! not all ModuleTypes implemented
+        for node_type in type_dict:
+            node = duco.nodes.Node.factory(node_id, node_type, hub)
+
+            self.assertIs(type(node), type(type_dict[node_type]))
+            self.assertEqual(node.node_id, node_id, "")
+            self.assertEqual(node.node_type, node_type, "")
+
     def test_init(self):
         node_id = 1
         hub = MagicMock(spec=['read_holding_registers', 'read_input_registers', 'write_register'])
@@ -102,6 +126,18 @@ class TestCO2SensorNode(unittest.TestCase):
 
 
 class TestRHSensorNode(unittest.TestCase):
-    def test_init(self):
+    def test_all(self):
+        node_id = 1
+        hub = MagicMock(spec=['read_holding_registers', 'read_input_registers', 'write_register'])
+        hub_read_result_ok = MagicMock(spec=['registers'])
+        
+        rh_ref = 4974
+        registers = PropertyMock(return_value=[rh_ref])
+        type(hub_read_result_ok).registers = registers
+        hub.read_input_registers.return_value = hub_read_result_ok
+
+        rh_sensor = duco.nodes.RHSensorNode(node_id, ModuleType.ROOM_SENSOR_RH, hub)
+        #print(str(rh_sensor))
+        #print(rh_sensor.state)
         self.assertTrue(True)
 
