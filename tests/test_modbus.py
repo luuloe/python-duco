@@ -1,6 +1,5 @@
 """Test methods in duco/modbus.py."""
 import unittest
-import mock
 # from unittest.mock import Mock
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 from duco.const import (DUCO_MODULE_TYPE_MASTER)
@@ -84,7 +83,7 @@ class TestModbusHub(unittest.TestCase):
         client_config = duco.modbus.create_client_config('tcp', 501, '192.168.0.2')
         hub = duco.modbus.ModbusHub(client_config)
         hub.setup()
-        #hub._client.connect.assert_called_once()
+        self.assertEqual(hub._client.connect.call_count, 2)
 
         # udp
         client_config = duco.modbus.create_client_config('udp', 502, '192.168.0.3')
