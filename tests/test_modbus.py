@@ -1,7 +1,8 @@
 """Test methods in duco/modbus.py."""
 import unittest
+import mock
 # from unittest.mock import Mock
-from unittest.mock import MagicMock, Mock, PropertyMock
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 from duco.const import (DUCO_MODULE_TYPE_MASTER)
 from duco.enum_types import (ModuleType)
 import duco.modbus
@@ -24,7 +25,8 @@ class TestCreateClientConfig(unittest.TestCase):
 
 
 class TestModbusHub(unittest.TestCase):
-    def test_init_1(self):
+    def test_init(self):
+        # serial
         client_config = duco.modbus.create_client_config('serial', '/dev/usb0')
         hub = duco.modbus.ModbusHub(client_config)
 
@@ -32,6 +34,7 @@ class TestModbusHub(unittest.TestCase):
         self.assertEqual(hub._kwargs, {'unit': client_config[duco.modbus.CONF_MASTER_UNIT_ID]}, "")
         self.assertEqual(hub._config_type, client_config[duco.modbus.CONF_TYPE], "")
         self.assertEqual(hub._config_port, client_config[duco.modbus.CONF_PORT], "")
+        self.assertRaises(AttributeError, lambda: hub._config_host)
         self.assertEqual(hub._config_timeout, client_config[duco.modbus.CONF_TIMEOUT], "")
         self.assertEqual(hub._config_delay, 0, "")
         self.assertEqual(hub._config_method, client_config[duco.modbus.CONF_METHOD], "")
@@ -39,6 +42,64 @@ class TestModbusHub(unittest.TestCase):
         self.assertEqual(hub._config_stopbits, client_config[duco.modbus.CONF_STOPBITS], "")
         self.assertEqual(hub._config_bytesize, client_config[duco.modbus.CONF_BYTESIZE], "")
         self.assertEqual(hub._config_parity, client_config[duco.modbus.CONF_PARITY], "")
+
+        # tcp
+        client_config = duco.modbus.create_client_config('tcp', 502, '192.168.0.1')
+        hub = duco.modbus.ModbusHub(client_config)
+
+        self.assertEqual(hub._client, None, "")
+        self.assertEqual(hub._kwargs, {'unit': client_config[duco.modbus.CONF_MASTER_UNIT_ID]}, "")
+        self.assertEqual(hub._config_type, client_config[duco.modbus.CONF_TYPE], "")
+        self.assertEqual(hub._config_port, client_config[duco.modbus.CONF_PORT], "")
+        self.assertEqual(hub._config_host, client_config[duco.modbus.CONF_HOST], "")
+        self.assertEqual(hub._config_timeout, client_config[duco.modbus.CONF_TIMEOUT], "")
+        self.assertEqual(hub._config_delay, 0, "")
+        self.assertRaises(AttributeError, lambda: hub._config_method)
+        self.assertRaises(AttributeError, lambda: hub._config_baudrate)
+        self.assertRaises(AttributeError, lambda: hub._config_stopbits)
+        self.assertRaises(AttributeError, lambda: hub._config_bytesize)
+        self.assertRaises(AttributeError, lambda: hub._config_parity)
+
+        # incorrect type
+        self.assertRaises(ValueError, lambda: duco.modbus.create_client_config('some', '/dev/usb0'))
+
+    @patch('pymodbus.client.sync.ModbusRtuFramer')
+    @patch('pymodbus.client.sync.ModbusSerialClient')
+    @patch('pymodbus.client.sync.ModbusTcpClient')
+    @patch('pymodbus.client.sync.ModbusUdpClient')
+    def test_setup(self, udp_client, tcp_client, serial_client, rtu_framer):
+        # serial
+        client_config = duco.modbus.create_client_config('serial', '/dev/usb0')
+        hub = duco.modbus.ModbusHub(client_config)
+        hub.setup()
+        hub._client.connect.assert_called_once()
+
+        # rtuovertcp
+        client_config = duco.modbus.create_client_config('rtuovertcp', 500, '192.168.0.1')
+        hub = duco.modbus.ModbusHub(client_config)
+        hub.setup()
+        hub._client.connect.assert_called_once()
+      
+        # tcp
+        client_config = duco.modbus.create_client_config('tcp', 501, '192.168.0.2')
+        hub = duco.modbus.ModbusHub(client_config)
+        hub.setup()
+        #hub._client.connect.assert_called_once()
+
+        # udp
+        client_config = duco.modbus.create_client_config('udp', 502, '192.168.0.3')
+        hub = duco.modbus.ModbusHub(client_config)
+        hub.setup()
+        hub._client.connect.assert_called_once()
+
+        # incorrect type
+        client_config = {duco.modbus.CONF_TYPE: 'some_type',
+                         duco.modbus.CONF_PORT: '403',
+                         duco.modbus.CONF_MASTER_UNIT_ID: int(0),
+                         duco.modbus.CONF_TIMEOUT: int(3),
+                         duco.modbus.CONF_HOST: 'some_host'}
+        hub = duco.modbus.ModbusHub(client_config)
+        self.assertRaises(ValueError, lambda: hub.setup())
 
     def test_close(self):
         modbus_client = MagicMock()
@@ -262,9 +323,13 @@ class TestModbusRegister(unittest.TestCase):
         self.assertEqual(value, "37.54")
 
     def test_get_value_raises(self):
-        mock_result = MagicMock(spec=[])
+        # correct result
+        mock_result_ok = MagicMock(spec=['registers'])
+        registers = PropertyMock(return_value=[3754])
+        type(mock_result_ok).registers = registers
+        # no result (raises AttributeError)
+        mock_result_attrerror = MagicMock(spec=[])
         mock_hub = MagicMock(spec=['read_input_registers'])
-        mock_hub.read_input_registers.return_value = mock_result
 
         r_name = 'SomeName'
         r_reg_addr = 3
@@ -276,9 +341,16 @@ class TestModbusRegister(unittest.TestCase):
         reg = duco.modbus.ModbusRegister(mock_hub, r_name, r_reg_addr,
                                          r_reg_type, r_unit,
                                          r_scale, r_offset, r_precision)
-        value = reg.value
-        mock_hub.read_input_registers.assert_called_once_with(r_reg_addr, 1)
-        self.assertEqual(value, None)
+
+        # 1. no result
+        mock_hub.read_input_registers.return_value = mock_result_attrerror
+        self.assertEqual(reg.value, None)
+        # 2. correct result
+        mock_hub.read_input_registers.return_value = mock_result_ok
+        self.assertEqual(reg.value, "37.54")
+        # 3. no result from modbus, should return previous value
+        mock_hub.read_input_registers.return_value = mock_result_attrerror
+        self.assertEqual(reg.value, "37.54")
 
     def test_set_value_holding(self):
         mock_hub = MagicMock(spec=['write_register'])

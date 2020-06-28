@@ -44,10 +44,11 @@ def create_client_config(modbus_client_type, modbus_client_port,
         config[CONF_BYTESIZE] = DUCO_MODBUS_BYTE_SIZE
         config[CONF_STOPBITS] = DUCO_MODBUS_STOP_BITS
         config[CONF_PARITY] = DUCO_MODBUS_PARITY
-    elif modbus_client_type == 'tcp':
+    elif modbus_client_type in ('tcp', 'rtuovertcp', 'udp'):
         config[CONF_HOST] = str(modbus_client_host)
     else:
-        raise ValueError("modbus_client_type must be serial or tcp")
+        raise ValueError("modbus_client_type must be serial, tcp, " +
+                         "rtuovertcp or udp")
 
     return config
 
